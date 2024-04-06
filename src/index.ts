@@ -45,20 +45,32 @@ app.get('/', async (c) => {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+
+  .selectedGenre {
+  background-color: #3498db; /* Blue background */
+  color: white; /* White text */
+  border: none; /* Remove border */
+}
+
   </style>
 </head>
 <body>
   <header>
     <h1>Welcome to ImageHarmony</h1>
   </header>
-  <div id="chat"></div> <!-- Chat container -->
-  <form id="aiForm">
-    <!-- <input type="text" id="userInput" placeholder="Ask me anything..."> -->
-    <!-- <button type="submit">Submit</button> -->
-  </form>
-  <button onclick="generateLyrics()">Lyric her</button>
-  <button id="bananBtn" onclick="setFruit('banan')">love</button>
-<button id="apfelBtn" onclick="setFruit('apfel')">Apfel</button>
+
+  <button id="generateText" onclick="generateLyrics()">Generate Lyrics</button>
+  <button id="rock" onclick="setGenre('rock')">Rock</button>
+  <button id="classic" onclick="setGenre('classic')">Classic</button>
+  <button id="love" onclick="setGenre('love')">Love</button>
+  <button id="kpop" onclick="setGenre('kpop')">K-pop</button>
+  <button id="kids" onclick="setGenre('kids')">Kids</button>
+  <button id="hiphop" onclick="setGenre('hiphop')">Hip Hop</button>
+  <button id="country" onclick="setGenre('country')">Country</button>
+  <button id="pop" onclick="setGenre('pop')">pop</button>
+  <button id="banana" onclick="setGenre('banana')">Banana</button>
+
+  <button onclick="restart()">Restart</button>
 
 <input type="file" id="imageInput" accept="image/*">
   <img id="uploadedImage" style="max-width: 200px; display: none;" />
@@ -72,9 +84,17 @@ let imgDescription = '';
 let lyricsTemplate = '';
 let genre = '';
 
-function setFruit(fruit) {
-  genre = fruit;
+
+
+function setGenre(selectedGenre) {
+  if (genre !== '') {
+    document.getElementById(genre).classList.remove('selectedGenre');
+  }
+  document.getElementById(selectedGenre).classList.add('selectedGenre');
+  genre = selectedGenre;
+  updateGenerateButtonState();
 }
+
 
 document.getElementById('imageInput').addEventListener('change', function(e) {
   if (e.target.files.length > 0) {
@@ -82,14 +102,33 @@ document.getElementById('imageInput').addEventListener('change', function(e) {
     reader.onload = function(e) {
       document.getElementById('uploadedImage').src = e.target.result;
       document.getElementById('uploadedImage').style.display = 'block';
-      document.getElementById('generateText').disabled = false; // Enable button
+      updateGenerateButtonState();
     };
     reader.readAsDataURL(e.target.files[0]);
   }
 });
 
+function updateGenerateButtonState() {
+  const isImageUploaded = document.getElementById('imageInput').files.length > 0;
+  const isGenreSelected = genre !== '' && genre !== undefined;
+  document.getElementById('generateText').disabled = !(isImageUploaded && isGenreSelected);
+}
+
 async function generateLyrics() {
   document.getElementById('loader').classList.remove('hidden'); // Show loader
+
+  document.getElementById('generateText').disabled=true;
+  document.getElementById('rock').disabled=true;
+  document.getElementById('classic').disabled=true;
+  document.getElementById('love').disabled=true;
+  document.getElementById('kpop').disabled=true;
+  document.getElementById('kids').disabled=true;
+  document.getElementById('hiphop').disabled=true;
+  document.getElementById('country').disabled=true;
+  document.getElementById('pop').disabled=true;
+  document.getElementById('banana').disabled=true;
+
+
 
   const image = document.getElementById('imageInput').files[0];
   const formData = new FormData();
@@ -132,6 +171,27 @@ async function generateLyrics() {
     document.getElementById('loader').classList.add('hidden'); // Hide loader
   }
 }
+
+function restart() {
+  
+  document.getElementById('generateText').disabled=true;
+  document.getElementById('rock').disabled=false;
+  document.getElementById('classic').disabled=false;
+  document.getElementById('love').disabled=false;
+  document.getElementById('kpop').disabled=false;
+  document.getElementById('kids').disabled=false;
+  document.getElementById('hiphop').disabled=false;
+  document.getElementById('country').disabled=false;
+  document.getElementById('pop').disabled=false;
+  document.getElementById('banana').disabled=false;
+  document.getElementById('uploadedImage').src = '';
+  document.getElementById('imageInput').src = '';
+  
+  document.getElementById(genre).classList.remove('selectedGenre');
+  setGenre('');
+
+}
+updateGenerateButtonState();
 </script>
 
 
@@ -176,11 +236,7 @@ app.post('/generate-text', async (c) => {
 		};
 
 		try {
-			// Call the `@cf/unum/uform-gen2-qwen-500m` model
 			const response = await ai.run('@cf/unum/uform-gen2-qwen-500m', inputs);
-
-			// Process and format the AI model response
-			// Assuming the response contains a property like `description` with the generated text
 			const description = response.description || 'Description not available.';
 
 			return c.json({ description });
@@ -199,16 +255,38 @@ app.post('/lyrics', async (c) => {
 	const mode = body.mode || 'no';
 
 	const ai = new Ai(c.env.AI);
-	console.log(content);
-	// console.log(content);
+
 	let systemMessage = 'You are a helpful assistant.';
-	if (mode === 'banan') {
+	if (mode === 'rock') {
+		systemMessage =
+			'Immerse yourself in the spirit of rock. Using the provided template, forge one verse and a chorus that scream rebellion and freedom. Let the raw energy of rock infuse the template’s narrative, morphing it into a powerful anthem of defiance or a celebration of independence, all while keeping the essence of the story intact.';
+	} else if (mode === 'classic') {
+		systemMessage =
+			'Adopt the persona of a classical composer. Transform the given template into a verse and a chorus that could grace the halls of a grand concert. Employ elegance and a profound depth of emotion, ensuring that the classical rendition of the template’s story carries a timeless beauty and a narrative weight.';
+	} else if (mode === 'love') {
 		systemMessage =
 			'Channel your essence into the heart of Amor, and with poetic brevity, craft a love song that sings directly from the provided scenario. Your canvas is clear: one verse and one chorus only. No explanations, no embellishments beyond the song itself. Begin with a verse that paints the initial encounter with love, drawing vividly from the scene set before you. Then, weave a chorus that echoes the eternal nature of this newfound love. Let each word pulse with the rhythm of affection, every line a stroke of emotion, capturing the essence of love in its purest form. Create this as a standalone piece of art, a testament to love, with no need for further commentary.';
-	} else if (mode === 'apfel') {
-		systemMessage = 'You are a helpful assistant and with every response you also say how much you like apple';
+	} else if (mode === 'kpop') {
+		systemMessage =
+			'Channel K-pop’s dynamic flair. Take the template and create one verse and a chorus that blend relatable stories with the genre’s signature energetic beats and catchy melodies. Ensure the transformation reflects K-pop’s vibrant culture and visual aesthetics, making the template’s narrative pop.';
+	} else if (mode === 'kids') {
+		systemMessage =
+			'Step into a world of childlike wonder. Use the template to compose a verse and a chorus for a kids’ song thats engaging, educational, or simply fun. The lyrics should be easy to understand and sing along to, sparking joy and curiosity while faithfully telling the template’s story.';
+	} else if (mode === 'hiphop') {
+		systemMessage =
+			'Assume the role of a hip-hop storyteller. With the template as your foundation, lay down a verse and a chorus that convey authentic stories or messages with a compelling rhythm. Let the lyrics reflect hip-hop’s powerful voice, turning the template’s essence into a narrative of resilience or celebration.';
+	} else if (mode === 'country') {
+		systemMessage =
+			'Embrace the soul of country music. Transform the template into a verse and a chorus that narrate tales of love, loss, or daily life, with a backdrop of country landscapes or themes. Your lyrics should carry the heartfelt sincerity and narrative depth characteristic of country music, staying true to the original story.';
+	} else if (mode === 'pop') {
+		systemMessage =
+			'Become a pop lyricist. Craft from the template a catchy pop song with one verse and a chorus. The lyrics should tap into universal themes, using the template’s story to create a relatable and memorable tune that has the potential to captivate a wide audience.';
+	} else if (mode === 'banana') {
+		systemMessage =
+			'Dive into the whimsical world of bananas. Take the given template and transform it into a fun, upbeat song centered around bananas. Your verse and chorus should highlight the joy and humor that bananas bring, using playful language and imagery to turn the template’s narrative into a celebration of this beloved fruit.';
 	} else {
-		systemMessage = 'you a a componist and based on the template you give yoe create  lyrics for a song with 2 song verses and a refrain.';
+		systemMessage =
+			'You are a composer tasked with creating lyrics for a song that includes one verse and a chorus, drawing inspiration from a given template. Focus on encapsulating the theme and emotions of the template, ensuring your lyrics resonate with the selected genre’s unique qualities.';
 	}
 
 	const messages = [
