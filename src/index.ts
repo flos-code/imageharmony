@@ -6,8 +6,6 @@ declare global {
 	}
 }
 
-// let imgDescription: string = 'test';
-
 const app = new Hono<Env>();
 
 app.get('/', async (c) => {
@@ -19,7 +17,17 @@ app.get('/', async (c) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ImageHarmony</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 20px; 
+      background-color: #ffffff; /* Light background */
+      color: #000000; /* Dark text */}
+
+    body.dark-mode { 
+      background-color: #121212; /* Dark background */
+      color: #ffffff; /* Light text */
+    }
+
     header { margin-bottom: 20px; }
     #chat { background-color: #f9f9f9; padding: 10px; max-width: 600px; margin: auto; }
     .message { padding: 5px 10px; margin: 5px 0; border-radius: 5px; }
@@ -52,12 +60,40 @@ app.get('/', async (c) => {
   border: none; /* Remove border */
 }
 
+.d-none {
+  display: none;
+}
+
+#broccoliBob {
+  position: absolute;
+  top: 50vh;
+  left: 0;
+
+}
+
+.imgBroccoliBob {
+  width: 100px;
+  height: 100px;
+}
+
+
   </style>
 </head>
 <body>
   <header>
     <h1>Welcome to ImageHarmony</h1>
+    <button onclick="toggleDarkMode()" id="themeToggle">Toggle Dark Mode</button>
   </header>
+
+  <div id="broccoliBob" class="d-none">
+    <img class="imgBroccoliBob" src="https://github.com/flos-code/DA-Bubble/assets/148456982/b03d5b7a-d0e4-4f8c-88d8-01a531407f27" alt="broccoli bob">
+    <div>Hey broccoli bob here</div>
+    <button id="startRecord">Start Recording</button>
+    <button id="stopRecord" disabled>Stop Recording</button>
+    <div id="wrongCode" class="d-none">
+      sorry wrong code
+    </div>
+  </div>
 
   <button id="generateText" onclick="generateLyrics()">Generate Lyrics</button>
   <button id="rock" onclick="setGenre('rock')">Rock</button>
@@ -68,7 +104,7 @@ app.get('/', async (c) => {
   <button id="hiphop" onclick="setGenre('hiphop')">Hip Hop</button>
   <button id="country" onclick="setGenre('country')">Country</button>
   <button id="pop" onclick="setGenre('pop')">pop</button>
-  <button id="banana" onclick="setGenre('banana')">Banana</button>
+  <button id="banana"  class="d-none" onclick="setGenre('banana')">Banana</button>
 
   <button onclick="restart()">Restart</button>
 
@@ -83,6 +119,14 @@ app.get('/', async (c) => {
 let imgDescription = '';
 let lyricsTemplate = '';
 let genre = '';
+let isDarkMode = false;
+
+let mediaRecorder;
+let audioChunks = [];
+let isRecording = false;
+
+document.getElementById("startRecord").addEventListener("click", startRecording);
+document.getElementById("stopRecord").addEventListener("click", stopRecording);
 
 
 
@@ -107,6 +151,19 @@ document.getElementById('imageInput').addEventListener('change', function(e) {
     reader.readAsDataURL(e.target.files[0]);
   }
 });
+
+function toggleDarkMode() {
+  if (isDarkMode) {
+    isDarkMode = false
+    document.body.classList.remove('dark-mode');
+    document.getElementById('broccoliBob').classList.add('d-none');
+
+  } else {
+    isDarkMode = true
+    document.body.classList.add('dark-mode');
+    document.getElementById('broccoliBob').classList.remove('d-none');
+  }
+}
 
 function updateGenerateButtonState() {
   const isImageUploaded = document.getElementById('imageInput').files.length > 0;
@@ -191,6 +248,56 @@ function restart() {
   setGenre('');
 
 }
+
+function startRecording() {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
+            audioChunks = [];
+            isRecording = true;
+            document.getElementById("stopRecord").disabled = false;
+
+            mediaRecorder.addEventListener("dataavailable", event => {
+                audioChunks.push(event.data);
+            });
+
+            mediaRecorder.addEventListener("stop", () => {
+                const audioBlob = new Blob(audioChunks);
+                sendAudioToServer(audioBlob);
+            });
+        });
+}
+
+// Function to stop recording
+function stopRecording() {
+    if (!isRecording) return;
+    mediaRecorder.stop();
+    isRecording = false;
+    document.getElementById("stopRecord").disabled = true;
+}
+
+// Function to send audio to server and process the response
+function sendAudioToServer(audioBlob) {
+    const formData = new FormData();
+    formData.append("audio", audioBlob);
+    
+    fetch("/analyze-audio", { method: "POST", body: formData })
+        .then(response => response.json())
+        .then(data => {
+            // Check if the transcription contains 'banana' or 'bananas'
+            if (data.transcription.toLowerCase().includes("banana")) {
+                document.getElementById("banana").classList.remove("d-none");
+                document.getElementById("wrongCode").classList.add("d-none");
+            } else {
+                document.getElementById("wrongCode").classList.remove("d-none");
+                document.getElementById("banana").classList.add("d-none");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+}
+
+
 updateGenerateButtonState();
 </script>
 
@@ -300,6 +407,25 @@ app.post('/lyrics', async (c) => {
 	const outputText = res.response ?? "Sorry, I couldn't process that.";
 
 	return c.json({ output: outputText });
+});
+
+app.post('/analyze-audio', async (c) => {
+	const formData = await c.req.formData();
+	const audioFile = formData.get('audio');
+
+	if (audioFile && audioFile instanceof File) {
+		const fileBuffer = await audioFile.arrayBuffer();
+		const ai = new Ai(c.env.AI);
+
+		// Adjust this part to call the Whisper model correctly
+		const input = { audio: [...new Uint8Array(fileBuffer)] };
+		const response = await ai.run('@cf/openai/whisper', input);
+
+		// Assuming `response` contains the transcription
+		return c.json({ transcription: response.text });
+	} else {
+		return c.json({ error: 'No audio file provided.' }, 400);
+	}
 });
 
 export default {
