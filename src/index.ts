@@ -6,6 +6,8 @@ declare global {
 	}
 }
 
+// let imgDescription: string = 'test';
+
 const app = new Hono<Env>();
 
 app.get('/', async (c) => {
@@ -51,127 +53,85 @@ app.get('/', async (c) => {
   </header>
   <div id="chat"></div> <!-- Chat container -->
   <form id="aiForm">
-    <input type="text" id="userInput" placeholder="Ask me anything..." required>
-    <button type="submit">Submit</button>
+    <!-- <input type="text" id="userInput" placeholder="Ask me anything..."> -->
+    <!-- <button type="submit">Submit</button> -->
   </form>
-  <button id="bananBtn" onclick="setFruit('banan')">Banan</button>
+  <button onclick="generateLyrics()">Lyric her</button>
+  <button id="bananBtn" onclick="setFruit('banan')">love</button>
 <button id="apfelBtn" onclick="setFruit('apfel')">Apfel</button>
 
 <input type="file" id="imageInput" accept="image/*">
-  <!-- Display Uploaded Image -->
-  <img id="uploadedImage" style="max-width: 100%; display: none;" />
-  <!-- Display Model Response -->
+  <img id="uploadedImage" style="max-width: 200px; display: none;" />
   <div id="modelResponse"></div>
-  <!-- Loader Animation -->
   <div id="loader" class="hidden">
     <div class="loader"></div>
   </div>
-  <!-- Button to Generate Text from Image -->
-  <button id="generateText" disabled>Generate Lyrics</button>
 
   <script>
+let imgDescription = '';
+let lyricsTemplate = '';
+let genre = '';
 
 function setFruit(fruit) {
-  sessionStorage.setItem('fruitMode', fruit);
+  genre = fruit;
 }
 
+document.getElementById('imageInput').addEventListener('change', function(e) {
+  if (e.target.files.length > 0) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('uploadedImage').src = e.target.result;
+      document.getElementById('uploadedImage').style.display = 'block';
+      document.getElementById('generateText').disabled = false; // Enable button
+    };
+    reader.readAsDataURL(e.target.files[0]);
+  }
+});
 
-  document.getElementById('aiForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const userInputField = document.getElementById('userInput');
-    const submitButton = document.querySelector('button[type="submit"]');
-    const chatContainer = document.getElementById('chat');
-    const fruitMode = sessionStorage.getItem('fruitMode') || 'no'; // Default to 'banan'
+async function generateLyrics() {
+  document.getElementById('loader').classList.remove('hidden'); // Show loader
 
-    
-    // Disable the input and button
-    userInputField.disabled = true;
-    submitButton.disabled = true;
+  const image = document.getElementById('imageInput').files[0];
+  const formData = new FormData();
+  formData.append('image', image);
 
-    
-
-    // Create and show loader
-    const loader = document.createElement('div');
-    loader.className = 'loader';
-    chatContainer.appendChild(loader);
-
-    const userInput = userInputField.value;
-    
-    // Append user's question
-    const userMessage = document.createElement('div');
-    userMessage.classList.add('message', 'user');
-    userMessage.textContent = userInput;
-    chatContainer.appendChild(userMessage);
-
-    // Fetch AI response
-    try {
-      const response = await fetch('/query', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: userInput, mode: fruitMode })
-      });
-
-      const result = await response.json();
-      
-      // Append AI's response
-      const aiMessage = document.createElement('div');
-      aiMessage.classList.add('message', 'ai');
-      aiMessage.textContent = 'AI Response: ' + result.output;
-      chatContainer.appendChild(aiMessage);
-    } catch (error) {
-      console.error('Fetching AI response failed:', error);
-      const errorMessage = document.createElement('div');
-      errorMessage.classList.add('message', 'ai');
-      errorMessage.textContent = 'AI Response: Sorry, something went wrong.';
-      chatContainer.appendChild(errorMessage);
-    } finally {
-      // Re-enable the input and button, remove loader
-      userInputField.disabled = false;
-      submitButton.disabled = false;
-      chatContainer.removeChild(loader);
-
-      // Clear the input field
-      userInputField.value = '';
-    }
-  });
-
-  document.getElementById('imageInput').addEventListener('change', function(e) {
-      if (e.target.files.length > 0) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          document.getElementById('uploadedImage').src = e.target.result;
-          document.getElementById('uploadedImage').style.display = 'block';
-          document.getElementById('generateText').disabled = false; // Enable button
-        };
-        reader.readAsDataURL(e.target.files[0]);
-      }
+  try {
+    // Step 1: Generate the image description
+    const descriptionResponse = await fetch('/generate-text', {
+      method: 'POST',
+      body: formData,
     });
+    const descriptionResult = await descriptionResponse.json();
+    imgDescription = descriptionResult.description; 
 
-    document.getElementById('generateText').addEventListener('click', async function() {
-      const image = document.getElementById('imageInput').files[0];
-      const formData = new FormData();
-      formData.append('image', image);
-
-      // Show loader
-      document.getElementById('loader').classList.remove('hidden');
-
-      try {
-        const response = await fetch('/generate-text', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const result = await response.json();
-        document.getElementById('modelResponse').textContent = 'Generated Lyrics: ' + result.description;
-      } catch (error) {
-        console.error('Error generating text:', error);
-        document.getElementById('modelResponse').textContent = 'Error generating text.';
-      } finally {
-        // Hide loader
-        document.getElementById('loader').classList.add('hidden');
-      }
+    // Step 2: Rephrase the image description (simulate with /query)
+    const rephraseResponse = await fetch('/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: imgDescription, mode: genre })
     });
+    const rephraseResult = await rephraseResponse.json();
+    const rephrasedDescription = rephraseResult.output; // Assuming output contains rephrased description
 
+    // Step 3: Generate lyrics based on the rephrased description
+    const lyricsResponse = await fetch('/lyrics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: rephrasedDescription, mode: genre })
+    });
+    const lyricsResult = await lyricsResponse.json();
+    const lyrics = lyricsResult.output; // Assuming output contains the final lyrics
+
+    // Display the final lyrics
+    document.getElementById('modelResponse').textContent = lyrics;
+
+  } catch (error) {
+    console.error('Error:', error);
+    document.getElementById('modelResponse').textContent = 'Error processing request.';
+  } finally {
+    document.getElementById('loader').classList.add('hidden'); // Hide loader
+  }
+}
 </script>
 
 
@@ -184,31 +144,21 @@ function setFruit(fruit) {
 app.post('/query', async (c) => {
 	const body = await c.req.json();
 	const content = body.content || 'Hello, World!';
-	const mode = body.mode || 'no';
 
 	const ai = new Ai(c.env.AI);
 
-	let systemMessage = 'You are a helpful assistant.';
-	if (mode === 'banan') {
-		systemMessage = 'You are a helpful assistant and with every response you also say how much you like banans';
-	} else if (mode === 'apfel') {
-		systemMessage = 'You are a helpful assistant and with every response you also say how much you like apple';
-	} else {
-		systemMessage = 'You are a helpful assistant and with every response you also say how much you like cats';
-	}
-
 	const messages = [
-		{ role: 'system', content: systemMessage },
+		{
+			role: 'system',
+			content:
+				'You are a helpful assistant who takes the following picture description and rephrases it so that you can write song lyrics from it. Your task is not to write lyrics directly. Just rewrite the image description so that it is easier to write a song with it.',
+		},
 		{ role: 'user', content },
 	];
 
 	const inputs = { messages };
 	const res = await ai.run('@cf/meta/llama-2-7b-chat-fp16', inputs);
-
-	// Log the AI response to the console
-	console.log('AI response:', JSON.stringify(res, null, 2));
-
-	// Adjusted to match the actual structure of the AI response
+	// console.log('AI response:', JSON.stringify(res, null, 2));
 	const outputText = res.response ?? "Sorry, I couldn't process that.";
 
 	return c.json({ output: outputText });
@@ -219,14 +169,10 @@ app.post('/generate-text', async (c) => {
 	const imageFile = formData.get('image');
 
 	if (imageFile && imageFile instanceof File) {
-		// Convert the File to a format suitable for the AI model API
 		const fileBuffer = await imageFile.arrayBuffer();
 		const ai = new Ai(c.env.AI);
-
-		// Prepare the input according to `@cf/unum/uform-gen2-qwen-500m` input requirements
 		const inputs = {
 			image: [...new Uint8Array(fileBuffer)],
-			// Include additional properties if needed, such as `prompt` or `max_tokens`
 		};
 
 		try {
@@ -245,6 +191,37 @@ app.post('/generate-text', async (c) => {
 	} else {
 		return c.json({ error: 'No image file provided.' }, 400);
 	}
+});
+
+app.post('/lyrics', async (c) => {
+	const body = await c.req.json();
+	const content = body.content || 'Hello, World!';
+	const mode = body.mode || 'no';
+
+	const ai = new Ai(c.env.AI);
+	console.log(content);
+	// console.log(content);
+	let systemMessage = 'You are a helpful assistant.';
+	if (mode === 'banan') {
+		systemMessage =
+			'Channel your essence into the heart of Amor, and with poetic brevity, craft a love song that sings directly from the provided scenario. Your canvas is clear: one verse and one chorus only. No explanations, no embellishments beyond the song itself. Begin with a verse that paints the initial encounter with love, drawing vividly from the scene set before you. Then, weave a chorus that echoes the eternal nature of this newfound love. Let each word pulse with the rhythm of affection, every line a stroke of emotion, capturing the essence of love in its purest form. Create this as a standalone piece of art, a testament to love, with no need for further commentary.';
+	} else if (mode === 'apfel') {
+		systemMessage = 'You are a helpful assistant and with every response you also say how much you like apple';
+	} else {
+		systemMessage = 'you a a componist and based on the template you give yoe create  lyrics for a song with 2 song verses and a refrain.';
+	}
+
+	const messages = [
+		{ role: 'system', content: systemMessage },
+		{ role: 'user', content },
+	];
+
+	const inputs = { messages };
+	const res = await ai.run('@cf/meta/llama-2-7b-chat-fp16', inputs);
+	// console.log('AI response:', JSON.stringify(res, null, 2));
+	const outputText = res.response ?? "Sorry, I couldn't process that.";
+
+	return c.json({ output: outputText });
 });
 
 export default {
