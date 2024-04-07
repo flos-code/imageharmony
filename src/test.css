@@ -7,6 +7,8 @@
 	--primary05: rgba(0, 188, 143, 0.5);
 	--secondary: rgb(144, 121, 243);
 	--accent: rgb(170, 76, 239);
+	--accent07: rgb(170, 76, 239, 0.7);
+	--accentLight: rgba(191, 142, 226, 0.7);
 }
 :root[data-theme='dark'] {
 	--text: rgb(222, 252, 245);
@@ -17,6 +19,8 @@
 	--primary05: rgba(66, 255, 211, 0.5);
 	--secondary: rgb(35, 12, 136);
 	--accent: rgb(110, 16, 178);
+	--accent07: rgb(110, 16, 178, 0.7);
+	--accentLight: rgba(130, 64, 178, 0.7);
 }
 
 * {
@@ -30,19 +34,35 @@ body {
 	font-weight: 400;
 	background-color: var(--background);
 	color: var(--text);
+	margin: 0;
+}
+
+#emojis {
+	position: absolute;
+	inset: 16px;
+	z-index: -1;
+}
+
+.emoji {
+	position: absolute;
+	font-size: 32px; /* Adjust size as needed */
+	filter: drop-shadow(4px 4px 8px var(--text));
 }
 
 header {
-	margin-bottom: 20px;
+	margin: 16px calc((100vw - 1000px) / 2);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 }
 
 .d-none {
-	display: none;
+	display: none !important;
 }
 
 .inputSection {
 	display: flex;
-	margin: 0 240px;
+	margin: 0 calc((100vw - 1000px) / 2);
 	justify-content: space-between;
 	align-items: center;
 }
@@ -182,40 +202,281 @@ header {
 	pointer-events: none;
 }
 
-.loader {
-	border: 4px solid #f3f3f3;
-	border-radius: 50%;
-	border-top: 4px solid #3498db;
+.outputSection {
+	margin: 32px 0 0 calc(((100vw - 1000px) / 2) + 385px);
+	width: 380px;
+	padding: 16px 32px;
+	display: flex;
+	gap: 8px;
+	flex-direction: column;
+	align-items: center;
+	background-color: var(--accentLight);
+	font-size: 20px;
+}
+
+.uploadInfo {
+	text-align: center;
+}
+
+#generateText {
+	font-family: 'Salsa';
+	font-weight: 600;
+	font-size: 24px;
+	padding: 8px;
+	color: var(--text);
+	background: var(--accent);
+	border: none;
+	transition: all 0.3s;
+}
+
+#generateText:disabled {
+	cursor: not-allowed !important;
+	background: lightgray !important;
+	color: gray;
+}
+
+#generateText:hover {
+	cursor: pointer;
+	background: var(--secondary);
+}
+
+#generateText:active {
+	background: var(--accentLight);
+}
+
+#reset {
+	font-family: 'Salsa';
+	font-weight: 600;
+	font-size: 24px;
+	padding: 8px;
+	color: var(--text);
+	background: var(--accent);
+	border: none;
+	transition: all 0.3s;
+}
+
+#reset:hover {
+	cursor: pointer;
+	background: var(--secondary);
+}
+
+#reset:active {
+	background: var(--accentLight);
+}
+
+#modelResponse {
+	background-color: var(--accent07);
+	padding: 8px;
+	max-height: 240px;
+	overflow-y: scroll;
+}
+
+.loader-container {
+	display: flex;
+	width: 46px;
+	height: 46px;
+	flex-wrap: wrap;
+	gap: 2px;
+	padding: 2px;
+	background-color: var(--accent);
+}
+
+.square {
 	width: 20px;
 	height: 20px;
-	-webkit-animation: spin 2s linear infinite; /* Safari */
-	animation: spin 2s linear infinite;
+	background-color: var(--accent); /* White squares */
+	animation: changeColor 2s infinite linear;
 }
-/* Safari */
-@-webkit-keyframes spin {
-	0% {
-		-webkit-transform: rotate(0deg);
-	}
+
+/* Animation Keyframes */
+@keyframes changeColor {
+	0%,
 	100% {
-		-webkit-transform: rotate(360deg);
+		background-color: var(--accentLight);
+	}
+	25% {
+		background-color: var(--accent);
+	}
+	50% {
+		background-color: var(--accentLight);
+	}
+	75% {
+		background-color: var(--accentLight);
 	}
 }
-@keyframes spin {
-	0% {
-		transform: rotate(0deg);
-	}
-	100% {
-		transform: rotate(360deg);
-	}
+
+/* Apply different animation delays to each square */
+.loader-container .square:nth-child(2) {
+	animation-delay: 0.5s;
+}
+
+.loader-container .square:nth-child(4) {
+	animation-delay: 1s;
+}
+
+.loader-container .square:nth-child(3) {
+	animation-delay: 1.5s;
 }
 
 #broccoliBob {
 	position: absolute;
-	top: 50vh;
-	left: 0;
+	top: 420px;
+	transform-origin: center center;
+	transform: rotate(30deg) translateX(-120px);
+	display: flex;
+	/* Removed the transition property because we will use animations */
+}
+
+/* Define a keyframe for moving Bob horizontally */
+@keyframes moveBob {
+	from {
+		transform: translateX(-120px) rotate(30deg);
+	}
+	to {
+		transform: translateX(0) rotate(30deg);
+	}
+}
+
+@keyframes rotateBob {
+	from {
+		transform: rotate(30deg);
+	}
+	to {
+		transform: rotate(0);
+	}
+}
+
+.showBob {
+	animation: moveBob 1.5s forwards, rotateBob 1.5s 1.5s forwards; /* Start after moveBob finishes */
+}
+
+#interactionBob {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	align-items: center;
+}
+
+.chatBob {
+	width: 240px;
+	padding: 4px;
+	max-height: 400px;
+	overflow-y: scroll;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.messageBob {
+	background-color: var(--primary03);
+	padding: 4px;
+}
+
+.messageUser {
+	background-color: var(--accentLight);
+	padding: 4px;
+}
+
+.btnBob {
+	font-family: 'Salsa';
+	font-size: 18px;
+	border: 2px solid var(--text);
+	display: flex;
+	gap: 4px;
+	align-items: center;
+	padding: 4px;
+	color: var(--text);
+	background-color: transparent;
+}
+
+.btnBob:hover {
+	cursor: pointer;
+	box-shadow: 0px 4px 12px 4px var(--text02);
 }
 
 .imgBroccoliBob {
-	width: 100px;
-	height: 100px;
+	width: 200px;
+	height: 200px;
+}
+
+.imgBroccoliBob:hover {
+	cursor: pointer;
+}
+
+::-webkit-scrollbar {
+	width: 12px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background-color: var(--accentLight);
+	border: 3px solid transparent;
+	background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background-color: var(--primary03);
+}
+
+.sr-only {
+	position: absolute;
+	left: -9999px;
+	opacity: 0;
+}
+
+.toggle {
+	font-size: 1rem;
+	border: 0.125em solid currentColor;
+	cursor: pointer;
+	display: block;
+	height: 2em;
+	position: relative;
+	width: 3.75em;
+	box-sizing: unset;
+}
+.toggle span {
+	background-color: currentColor;
+	display: block;
+	height: 1.5em;
+	left: 0.25em;
+	overflow: hidden;
+	position: absolute;
+	top: 0.25em;
+	text-indent: -9999px;
+	transition: left 0.25s;
+	width: 1.5em;
+	z-index: 2;
+}
+
+.toggle::before,
+.toggle::after {
+	content: '';
+	display: block;
+	border-radius: 1em;
+	position: absolute;
+	z-index: 1;
+}
+
+.toggle::after {
+	box-shadow: 0.25em 0.25em #5901d8;
+	height: 1.125em;
+	right: 0.9em;
+	top: 0.125em;
+	width: 1.125em;
+}
+
+.toggle::before {
+	background-color: #ffc409;
+	height: 0.625em;
+	outline: 0.25em dotted #ffc409;
+	outline-offset: 0.125em;
+	left: 0.7em;
+	top: 0.7em;
+	width: 0.625em;
+}
+
+input:checked ~ .toggle span {
+	left: 2em;
 }

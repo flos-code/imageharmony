@@ -12,8 +12,12 @@
 	</head>
 	<body>
 		<header>
+			<div id="emojis"></div>
 			<h1>Welcome to ImageHarmony</h1>
-			<button onclick="toggleDarkMode()" id="themeToggle">Toggle Dark Mode</button>
+			<input onclick="toggleDarkMode()" type="checkbox" class="sr-only" id="darkmode-toggle" />
+			<label for="darkmode-toggle" class="toggle">
+				<span>Toggle dark mode</span>
+			</label>
 		</header>
 		<section class="inputSection">
 			<div class="buttonContainer">
@@ -49,25 +53,49 @@
 		</section>
 
 		<section class="outputSection">
+			<span class="uploadInfo">In order to generate lyrics, please select and genre and provide an image.</span>
 			<button id="generateText" onclick="generateLyrics()">Generate Lyrics</button>
-			<button onclick="restart()">Restart</button>
+			<button id="reset" onclick="restart()" class="d-none">Restart</button>
+			<div id="loader" class="loader-container d-none">
+				<div class="square"></div>
+				<div class="square"></div>
+				<div class="square"></div>
+				<div class="square"></div>
+			</div>
 
-			<div id="modelResponse"></div>
-			<div id="loader" class="d-none">
-				<div class="loader"></div>
+			<div id="modelResponse">
+				Lorem ipsum dolor sit amet consectetur, adipisicing elit. Distinctio veniam labore iure maxime quod nisi, nemo aliquid quae fugit
+				totam, culpa suscipit placeat recusandae quaerat ipsa pariatur id eaque! Facere? Lorem ipsum dolor, sit amet consectetur adipisicing
+				elit. Praesentium minima quas dignissimos placeat omnis, maiores optio eum nostrum sunt repudiandae delectus aut recusandae iusto
+				excepturi a ab perferendis. Obcaecati, quasi?Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime illum repellendus in,
+				accusantium modi recusandae perferendis iste quas consequuntur consequatur excepturi voluptas. Voluptatibus voluptas sint at
+				nesciunt et reiciendis alias.
 			</div>
 		</section>
 
-		<div id="broccoliBob" class="d-none">
+		<div id="broccoliBob" onclick="showBob()" class="d-none">
 			<img
 				class="imgBroccoliBob"
 				src="https://github.com/flos-code/DA-Bubble/assets/148456982/b03d5b7a-d0e4-4f8c-88d8-01a531407f27"
 				alt="broccoli bob"
 			/>
-			<div>Hey broccoli bob here</div>
-			<button id="startRecord">Start Recording</button>
-			<button id="stopRecord" disabled>Stop Recording</button>
-			<div id="wrongCode" class="d-none">sorry wrong code</div>
+			<div id="interactionBob" class="d-none">
+				<div class="chatBob">
+					<div class="messageBob">
+						Hey, Broccoli Bob here, it's clear that I'm the king of vegetables, but one question is bothering me for a long time. Tell me
+						which fruit is the superior one?
+					</div>
+
+					<div class="messageUser">
+						Hey, Broccoli Bob here, it's clear that I'm the king of vegetables, but one question is bothering me for a long time. Tell me
+						which fruit is the superior one?
+					</div>
+					<div id="wrongCode" class="d-none">sorry wrong code</div>
+				</div>
+
+				<button class="btnBob" id="startRecord">Talk to Bob <span class="material-symbols-outlined"> mic </span></button>
+				<button class="btnBob d-none" id="stopRecord" disabled>Nuff said <span class="material-symbols-outlined"> mic_off </span></button>
+			</div>
 		</div>
 
 		<script>
@@ -81,6 +109,9 @@
 			let audioChunks = [];
 			let isRecording = false;
 
+			let emojis = ['🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵'];
+			let speed = 2; // Adjust for faster or slower movement
+
 			document.getElementById('startRecord').addEventListener('click', startRecording);
 			document.getElementById('stopRecord').addEventListener('click', stopRecording);
 
@@ -90,6 +121,33 @@
 				}
 				document.getElementById(selectedGenre).classList.add('selectedGenre');
 				genre = selectedGenre;
+
+				document.getElementById('emojis').innerHTML = '';
+
+				if (selectedGenre === 'rock') {
+					emojis = ['🤘', '🤘', '🤘', '🤘', '🤘', '🤘', '🤘', '🤘', '🤘', '🤘'];
+				} else if (selectedGenre === 'classic') {
+					emojis = ['🎻', '🎻', '🎻', '🎻', '🎻', '🎻', '🎻', '🎻', '🎻', '🎻'];
+				} else if (selectedGenre === 'love') {
+					emojis = ['💖', '💖', '💖', '💖', '💖', '💖', '💖', '💖', '💖', '💖'];
+				} else if (selectedGenre === 'kpop') {
+					emojis = ['🌸', '🌸', '🌸', '🌸', '🌸', '🌸', '🌸', '🌸', '🌸', '🌸'];
+				} else if (selectedGenre === 'kids') {
+					emojis = ['🧸', '🧸', '🧸', '🧸', '🧸', '🧸', '🧸', '🧸', '🧸', '🧸'];
+				} else if (selectedGenre === 'hiphop') {
+					emojis = ['🎧', '🎧', '🎧', '🎧', '🎧', '🎧', '🎧', '🎧', '🎧', '🎧'];
+				} else if (selectedGenre === 'country') {
+					emojis = ['🪕', '🪕', '🪕', '🪕', '🪕', '🪕', '🪕', '🪕', '🪕', '🪕'];
+				} else if (selectedGenre === 'pop') {
+					emojis = ['🎤', '🎤', '🎤', '🎤', '🎤', '🎤', '🎤', '🎤', '🎤', '🎤'];
+				} else if (selectedGenre === 'banana') {
+					emojis = ['🍌', '🍌', '🍌', '🍌', '🍌', '🍌', '🍌', '🍌', '🍌', '🍌'];
+				}
+
+				emojis.forEach((emojiChar) => {
+					const emoji = createEmoji(emojiChar);
+					moveEmoji(emoji, speed);
+				});
 				updateGenerateButtonState();
 			}
 
@@ -157,6 +215,8 @@
 				} else {
 					document.documentElement.setAttribute('data-theme', 'light');
 					document.getElementById('broccoliBob').classList.add('d-none');
+					document.getElementById('broccoliBob').classList.remove('showBob');
+					document.getElementById('interactionBob').classList.add('d-none');
 				}
 			}
 
@@ -241,6 +301,8 @@
 			}
 
 			function startRecording() {
+				document.getElementById('startRecord').classList.add('d-none');
+				document.getElementById('stopRecord').classList.remove('d-none');
 				navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
 					mediaRecorder = new MediaRecorder(stream);
 					mediaRecorder.start();
@@ -264,7 +326,7 @@
 				if (!isRecording) return;
 				mediaRecorder.stop();
 				isRecording = false;
-				document.getElementById('stopRecord').disabled = true;
+				document.getElementById('stopRecord').classList.add('d-none');
 			}
 
 			// Function to send audio to server and process the response
@@ -298,6 +360,53 @@
 				document.getElementById('uploadImageBtn').classList.remove('d-none');
 				updateGenerateButtonState();
 			}
+
+			function showBob() {
+				document.getElementById('broccoliBob').classList.add('showBob');
+
+				setTimeout(function () {
+					document.getElementById('interactionBob').classList.remove('d-none');
+				}, 3000); // 2000 milliseconds = 2 seconds
+			}
+
+			function createEmoji(emojiChar) {
+				const emoji = document.createElement('div');
+				emoji.textContent = emojiChar;
+				emoji.className = 'emoji';
+				document.getElementById('emojis').appendChild(emoji);
+				return emoji;
+			}
+
+			function moveEmoji(emoji, speed) {
+				let x = Math.random() * document.getElementById('emojis').offsetWidth;
+				let y = Math.random() * document.getElementById('emojis').offsetHeight;
+				let dx = (Math.random() - 0.5) * speed;
+				let dy = (Math.random() - 0.5) * speed;
+
+				function animate() {
+					const emojisDiv = document.getElementById('emojis');
+					const maxX = emojisDiv.offsetWidth - emoji.offsetWidth;
+					const maxY = emojisDiv.offsetHeight - emoji.offsetHeight;
+
+					x += dx;
+					y += dy;
+
+					if (x <= 0 || x >= maxX) dx *= -1;
+					if (y <= 0 || y >= maxY) dy *= -1;
+
+					emoji.style.left = x + 'px';
+					emoji.style.top = y + 'px';
+
+					requestAnimationFrame(animate);
+				}
+
+				animate();
+			}
+
+			emojis.forEach((emojiChar) => {
+				const emoji = createEmoji(emojiChar);
+				moveEmoji(emoji, speed);
+			});
 
 			updateGenerateButtonState();
 		</script>

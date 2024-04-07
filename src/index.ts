@@ -17,7 +17,7 @@ app.get('/', async (c) => {
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>ImageHarmony</title>
 <style>
-  :root[data-theme='light'] {
+	:root[data-theme='light'] {
 	--text: rgb(3, 33, 26);
 	--text02: rgba(3, 33, 26, 0.2);
 	--background: rgb(248, 254, 253);
@@ -26,6 +26,8 @@ app.get('/', async (c) => {
 	--primary05: rgba(0, 188, 143, 0.5);
 	--secondary: rgb(144, 121, 243);
 	--accent: rgb(170, 76, 239);
+	--accent07: rgb(170, 76, 239, 0.7);
+	--accentLight: rgba(191, 142, 226, 0.7);
 }
 :root[data-theme='dark'] {
 	--text: rgb(222, 252, 245);
@@ -36,6 +38,8 @@ app.get('/', async (c) => {
 	--primary05: rgba(66, 255, 211, 0.5);
 	--secondary: rgb(35, 12, 136);
 	--accent: rgb(110, 16, 178);
+	--accent07: rgb(110, 16, 178, 0.7);
+	--accentLight: rgba(130, 64, 178, 0.7);
 }
 
 * {
@@ -47,26 +51,48 @@ app.get('/', async (c) => {
 body {
 	font-family: 'Salsa';
 	font-weight: 400;
-}
-
-body {
 	background-color: var(--background);
 	color: var(--text);
+	margin: 0;
+}
+
+#emojis {
+	position: absolute;
+	inset: 16px;
+	z-index: -1;
+}
+
+.emoji {
+	position: absolute;
+	font-size: 32px; /* Adjust size as needed */
+	filter: drop-shadow(4px 4px 8px var(--text));
 }
 
 header {
-	margin-bottom: 20px;
+	margin: 16px calc((100vw - 1000px) / 2);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 }
 
 .d-none {
-	display: none;
+	display: none !important;
+}
+
+.inputSection {
+	display: flex;
+	margin: 0 calc((100vw - 1000px) / 2);
+	justify-content: space-between;
+	align-items: center;
 }
 
 .buttonContainer {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 16px; /* Space between the buttons */
-	width: calc(3 * 120px + 2 * 16px);
+	gap: 5px;
+	padding: 5px;
+	width: 380px;
+	background-color: var(--primary03);
 }
 
 .genreButton {
@@ -74,13 +100,13 @@ header {
 	font-weight: 600;
 	font-size: 24px;
 	padding: 4px;
-	border-radius: 19px;
 	width: 120px;
+	height: 70px;
 	color: var(--text);
 	background: var(--primary05);
 	backdrop-filter: blur(9.1px);
 	-webkit-backdrop-filter: blur(9.1px);
-	border: 1px solid var(--primary03);
+	border: none;
 	transition: all 0.3s;
 }
 
@@ -90,11 +116,109 @@ header {
 	box-shadow: 0 6px 30px var(--text02);
 }
 
+.genreButton:active {
+	background: var(--accent);
+}
+
+.genreButton:disabled {
+	cursor: not-allowed !important;
+	background: lightgray !important;
+	color: gray;
+}
+
+.selectedGenre {
+	background-color: var(--accent) !important;
+}
+
+.imgContainer {
+	width: 230px;
+	height: 230px;
+	position: relative;
+}
+
+#uploadedImage {
+	position: absolute;
+	inset: 0;
+	width: 230px;
+	height: 230px;
+}
+
+#uploadImageText {
+	position: absolute;
+	top: 32px;
+	left: 50%;
+	transform: translate(-50%, 0);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 8px;
+	font-weight: 600;
+	font-size: 20px;
+	width: 80%;
+	color: var(--secondary);
+}
+
+.uploadIcon {
+	font-variation-settings: 'wght' 600;
+	font-size: 48px !important;
+}
+
+#uploadImageBtn {
+	position: absolute;
+	top: 165px;
+	left: 50%;
+	transform: translate(-50%, 0);
+	color: var(--text);
+	background: var(--primary05);
+	backdrop-filter: blur(9.1px);
+	-webkit-backdrop-filter: blur(9.1px);
+	border: none;
+	font-family: 'Salsa';
+	font-weight: 600;
+	font-size: 16px;
+	padding: 8px;
+	transition: all 0.3s;
+}
+
+#uploadImageBtn:hover {
+	cursor: pointer;
+	background: var(--primary03);
+	box-shadow: 0 6px 30px var(--text02);
+}
+
+#uploadImageBtn:active {
+	background: var(--accent);
+}
+
+#deleteImage {
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: none;
+	opacity: 0.7;
+	background-color: var(--primary);
+	transition: all 0.3s;
+}
+
+#deleteImage:hover {
+	cursor: pointer;
+	opacity: 1;
+}
+
+#deleteImage:active {
+	background: var(--accent);
+}
+
+.deleteIcon {
+	font-variation-settings: 'wght' 600;
+	font-size: 32px !important;
+}
+
 .drop-area {
-	border: 2px dashed #ccc;
-	border-radius: 20px;
-	margin-top: 20px;
-	padding: 50px 20px;
+	position: absolute;
+	inset: 0;
+	border: 4px dashed var(--secondary);
 }
 
 .file-elem {
@@ -103,59 +227,301 @@ header {
 	pointer-events: none;
 }
 
-.loader {
-	border: 4px solid #f3f3f3;
-	border-radius: 50%;
-	border-top: 4px solid #3498db;
+.outputSection {
+	margin: 32px 0 0 calc(((100vw - 1000px) / 2) + 385px);
+	width: 380px;
+	padding: 16px 32px;
+	display: flex;
+	gap: 8px;
+	flex-direction: column;
+	align-items: center;
+	background-color: var(--accentLight);
+	font-size: 20px;
+}
+
+#uploadInfo {
+	text-align: center;
+}
+
+#generateText {
+	font-family: 'Salsa';
+	font-weight: 600;
+	font-size: 24px;
+	padding: 8px;
+	color: var(--text);
+	background: var(--accent);
+	border: none;
+	transition: all 0.3s;
+}
+
+#generateText:disabled {
+	cursor: not-allowed !important;
+	background: lightgray !important;
+	color: gray;
+}
+
+#generateText:hover {
+	cursor: pointer;
+	background: var(--secondary);
+}
+
+#generateText:active {
+	background: var(--accentLight);
+}
+
+#reset {
+	font-family: 'Salsa';
+	font-weight: 600;
+	font-size: 24px;
+	padding: 8px;
+	color: var(--text);
+	background: var(--accent);
+	border: none;
+	transition: all 0.3s;
+}
+
+#reset:hover {
+	cursor: pointer;
+	background: var(--secondary);
+}
+
+#reset:active {
+	background: var(--accentLight);
+}
+
+#modelResponse {
+	background-color: var(--accent07);
+	padding: 8px;
+	max-height: 240px;
+	overflow-y: scroll;
+}
+
+.loader-container {
+	display: flex;
+	width: 46px;
+	height: 46px;
+	flex-wrap: wrap;
+	gap: 2px;
+	padding: 2px;
+	background-color: var(--accent);
+}
+
+.square {
 	width: 20px;
 	height: 20px;
-	-webkit-animation: spin 2s linear infinite; /* Safari */
-	animation: spin 2s linear infinite;
+	background-color: var(--accent); /* White squares */
+	animation: changeColor 2s infinite linear;
 }
-/* Safari */
-@-webkit-keyframes spin {
-	0% {
-		-webkit-transform: rotate(0deg);
-	}
+
+/* Animation Keyframes */
+@keyframes changeColor {
+	0%,
 	100% {
-		-webkit-transform: rotate(360deg);
+		background-color: var(--accentLight);
 	}
-}
-@keyframes spin {
-	0% {
-		transform: rotate(0deg);
+	25% {
+		background-color: var(--accent);
 	}
-	100% {
-		transform: rotate(360deg);
+	50% {
+		background-color: var(--accentLight);
+	}
+	75% {
+		background-color: var(--accentLight);
 	}
 }
 
-.selectedGenre {
-	background-color: #3498db; /* Blue background */
-	color: white; /* White text */
-	border: none; /* Remove border */
+/* Apply different animation delays to each square */
+.loader-container .square:nth-child(2) {
+	animation-delay: 0.5s;
+}
+
+.loader-container .square:nth-child(4) {
+	animation-delay: 1s;
+}
+
+.loader-container .square:nth-child(3) {
+	animation-delay: 1.5s;
 }
 
 #broccoliBob {
 	position: absolute;
-	top: 50vh;
-	left: 0;
+	top: 420px;
+	transform-origin: center center;
+	transform: rotate(30deg) translateX(-120px);
+	display: flex;
+	/* Removed the transition property because we will use animations */
+}
+
+/* Define a keyframe for moving Bob horizontally */
+@keyframes moveBob {
+	from {
+		transform: translateX(-120px) rotate(30deg);
+	}
+	to {
+		transform: translateX(0) rotate(30deg);
+	}
+}
+
+@keyframes rotateBob {
+	from {
+		transform: rotate(30deg);
+	}
+	to {
+		transform: rotate(0);
+	}
+}
+
+.showBob {
+	animation: moveBob 1.5s forwards, rotateBob 1.5s 1.5s forwards; /* Start after moveBob finishes */
+}
+
+#interactionBob {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	align-items: center;
+}
+
+.chatBob {
+	width: 240px;
+	padding: 4px;
+	max-height: 400px;
+	overflow-y: scroll;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.messageBob {
+	background-color: var(--primary03);
+	padding: 4px;
+}
+
+.messageUser {
+	background-color: var(--accentLight);
+	padding: 4px;
+}
+
+.btnBob {
+	font-family: 'Salsa';
+	font-size: 18px;
+	border: 2px solid var(--text);
+	display: flex;
+	gap: 4px;
+	align-items: center;
+	padding: 4px;
+	color: var(--text);
+	background-color: transparent;
+}
+
+.btnBob:hover {
+	cursor: pointer;
+	box-shadow: 0px 4px 12px 4px var(--text02);
 }
 
 .imgBroccoliBob {
-	width: 100px;
-	height: 100px;
+	width: 200px;
+	height: 200px;
+}
+
+.imgBroccoliBob:hover {
+	cursor: pointer;
+}
+
+::-webkit-scrollbar {
+	width: 12px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background-color: var(--accentLight);
+	border: 3px solid transparent;
+	background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background-color: var(--primary03);
+}
+
+.sr-only {
+	position: absolute;
+	left: -9999px;
+	opacity: 0;
+}
+
+.toggle {
+	font-size: 1rem;
+	border: 0.125em solid currentColor;
+	cursor: pointer;
+	display: block;
+	height: 2em;
+	position: relative;
+	width: 3.75em;
+	box-sizing: unset;
+}
+.toggle span {
+	background-color: currentColor;
+	display: block;
+	height: 1.5em;
+	left: 0.25em;
+	overflow: hidden;
+	position: absolute;
+	top: 0.25em;
+	text-indent: -9999px;
+	transition: left 0.25s;
+	width: 1.5em;
+	z-index: 2;
+}
+
+.toggle::before,
+.toggle::after {
+	content: '';
+	display: block;
+	border-radius: 1em;
+	position: absolute;
+	z-index: 1;
+}
+
+.toggle::after {
+	box-shadow: 0.25em 0.25em #5901d8;
+	height: 1.125em;
+	right: 0.9em;
+	top: 0.125em;
+	width: 1.125em;
+}
+
+.toggle::before {
+	background-color: #ffc409;
+	height: 0.625em;
+	outline: 0.25em dotted #ffc409;
+	outline-offset: 0.125em;
+	left: 0.7em;
+	top: 0.7em;
+	width: 0.625em;
+}
+
+input:checked ~ .toggle span {
+	left: 2em;
 }
 
 </style>
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+		/>
 	</head>
 	<body>
 		<header>
+			<div id="emojis"></div>
 			<h1>Welcome to ImageHarmony</h1>
-			<button onclick="toggleDarkMode()" id="themeToggle">Toggle Dark Mode</button>
+			<input onclick="toggleDarkMode()" type="checkbox" class="sr-only" id="darkmode-toggle" />
+			<label for="darkmode-toggle" class="toggle">
+				<span>Toggle dark mode</span>
+			</label>
 		</header>
-		<div>
-			<button id="generateText" onclick="generateLyrics()">Generate Lyrics</button>
+		<section class="inputSection">
 			<div class="buttonContainer">
 				<button id="rock" class="genreButton" onclick="setGenre('rock')">Rock</button>
 				<button id="classic" class="genreButton" onclick="setGenre('classic')">Classic</button>
@@ -167,34 +533,64 @@ header {
 				<button id="pop" class="genreButton" onclick="setGenre('pop')">Pop</button>
 				<button id="banana" class="genreButton d-none" onclick="setGenre('banana')">Banana</button>
 			</div>
+			<div class="imgContainer">
+				<div id="uploadImageText">
+					<span class="material-symbols-outlined uploadIcon"> upload </span>
+					<span
+						>Drag & Drop to Upload Image <br />
+						or</span
+					>
+				</div>
+				<input type="file" id="imageInput" class="d-none" accept="image/*" />
+				<div id="dropArea" class="drop-area">
+					<input type="file" id="fileElem" multiple accept="image/*" class="file-elem" />
+				</div>
 
-			<button onclick="restart()">Restart</button>
+				<img id="uploadedImage" class="d-none" />
+				<button id="uploadImageBtn" onclick="imageInput.click()" class="imgButton">Upload Image</button>
+				<button id="deleteImage" onclick="deleteImage()" class="d-none">
+					<span class="material-symbols-outlined deleteIcon"> delete </span>
+				</button>
+			</div>
+		</section>
 
-
-			<button onclick="imageInput.click()">Upload Image</button>
-      <button id="deleteImage" onclick="deleteImage()" class="d-none">Delete Image</button>
-			<input type="file" id="imageInput" class="d-none" accept="image/*" />
-			<div id="dropArea" class="drop-area">
-				Drop Your Files Here
-				<input type="file" id="fileElem" multiple accept="image/*" class="file-elem" />
+		<section class="outputSection">
+			<span id="uploadInfo">In order to generate lyrics, please select and genre and provide an image.</span>
+			<button id="generateText" onclick="generateLyrics()">Generate Lyrics</button>
+			<button id="reset" onclick="restart()" class="d-none">Restart</button>
+			<div id="loader" class="loader-container d-none">
+				<div class="square"></div>
+				<div class="square"></div>
+				<div class="square"></div>
+				<div class="square"></div>
 			</div>
 
-			<img id="uploadedImage" style="max-width: 200px; display: none" />
-			<div id="modelResponse"></div>
-			<div id="loader" class="d-none">
-				<div class="loader"></div>
+			<div id="modelResponse" class="d-none">
 			</div>
+		</section>
 
-			<div id="broccoliBob" class="d-none">
-				<img
-					class="imgBroccoliBob"
-					src="https://github.com/flos-code/DA-Bubble/assets/148456982/b03d5b7a-d0e4-4f8c-88d8-01a531407f27"
-					alt="broccoli bob"
-				/>
-				<div>Hey broccoli bob here</div>
-				<button id="startRecord">Start Recording</button>
-				<button id="stopRecord" disabled>Stop Recording</button>
-				<div id="wrongCode" class="d-none">sorry wrong code</div>
+		<div id="broccoliBob" onclick="showBob()" class="d-none">
+			<img
+				class="imgBroccoliBob"
+				src="https://github.com/flos-code/DA-Bubble/assets/148456982/b03d5b7a-d0e4-4f8c-88d8-01a531407f27"
+				alt="broccoli bob"
+			/>
+			<div id="interactionBob" class="d-none">
+				<div class="chatBob">
+					<div class="messageBob">
+						Hey, Broccoli Bob here, it's clear that I'm the king of vegetables, but one question is bothering me for a long time. Tell me
+						which fruit is the superior one?
+					</div>
+
+					<div class="messageUser">
+						Hey, Broccoli Bob here, it's clear that I'm the king of vegetables, but one question is bothering me for a long time. Tell me
+						which fruit is the superior one?
+					</div>
+					<div id="wrongCode" class="d-none">sorry wrong code</div>
+				</div>
+
+				<button class="btnBob" id="startRecord">Talk to Bob <span class="material-symbols-outlined"> mic </span></button>
+				<button class="btnBob d-none" id="stopRecord" disabled>Nuff said <span class="material-symbols-outlined"> mic_off </span></button>
 			</div>
 		</div>
 
@@ -203,11 +599,14 @@ header {
 			let lyricsTemplate = '';
 			let genre = '';
 			let isDarkMode = false;
-      let imgUpload;
+			let imgUpload;
 
 			let mediaRecorder;
 			let audioChunks = [];
 			let isRecording = false;
+
+			let emojis = ['🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵'];
+			let speed = 2; // Adjust for faster or slower movement
 
 			document.getElementById('startRecord').addEventListener('click', startRecording);
 			document.getElementById('stopRecord').addEventListener('click', stopRecording);
@@ -218,6 +617,33 @@ header {
 				}
 				document.getElementById(selectedGenre).classList.add('selectedGenre');
 				genre = selectedGenre;
+
+				document.getElementById('emojis').innerHTML = '';
+
+				if (selectedGenre === 'rock') {
+					emojis = ['🤘', '🤘', '🤘', '🤘', '🤘', '🤘', '🤘', '🤘', '🤘', '🤘'];
+				} else if (selectedGenre === 'classic') {
+					emojis = ['🎻', '🎻', '🎻', '🎻', '🎻', '🎻', '🎻', '🎻', '🎻', '🎻'];
+				} else if (selectedGenre === 'love') {
+					emojis = ['💖', '💖', '💖', '💖', '💖', '💖', '💖', '💖', '💖', '💖'];
+				} else if (selectedGenre === 'kpop') {
+					emojis = ['🌸', '🌸', '🌸', '🌸', '🌸', '🌸', '🌸', '🌸', '🌸', '🌸'];
+				} else if (selectedGenre === 'kids') {
+					emojis = ['🧸', '🧸', '🧸', '🧸', '🧸', '🧸', '🧸', '🧸', '🧸', '🧸'];
+				} else if (selectedGenre === 'hiphop') {
+					emojis = ['🎧', '🎧', '🎧', '🎧', '🎧', '🎧', '🎧', '🎧', '🎧', '🎧'];
+				} else if (selectedGenre === 'country') {
+					emojis = ['🪕', '🪕', '🪕', '🪕', '🪕', '🪕', '🪕', '🪕', '🪕', '🪕'];
+				} else if (selectedGenre === 'pop') {
+					emojis = ['🎤', '🎤', '🎤', '🎤', '🎤', '🎤', '🎤', '🎤', '🎤', '🎤'];
+				} else if (selectedGenre === 'banana') {
+					emojis = ['🍌', '🍌', '🍌', '🍌', '🍌', '🍌', '🍌', '🍌', '🍌', '🍌'];
+				}
+
+				emojis.forEach((emojiChar) => {
+					const emoji = createEmoji(emojiChar);
+					moveEmoji(emoji, speed);
+				});
 				updateGenerateButtonState();
 			}
 
@@ -232,14 +658,17 @@ header {
 					if (files.length > 0) {
 						// Process the first file (if multiple, you would need to loop through)
 						const file = files[0];
-            imgUpload = file;
-            document.getElementById('deleteImage').classList.remove('d-none')
+						imgUpload = file;
+						document.getElementById('deleteImage').classList.remove('d-none');
+						document.getElementById('dropArea').classList.add('d-none');
+						document.getElementById('uploadImageText').classList.add('d-none');
+						document.getElementById('uploadImageBtn').classList.add('d-none');
 						const reader = new FileReader();
 
 						reader.onload = function (e) {
 							// Update the display with the image
 							document.getElementById('uploadedImage').src = e.target.result;
-							document.getElementById('uploadedImage').style.display = 'block';
+							document.getElementById('uploadedImage').classList.remove('d-none');
 							updateGenerateButtonState(); // Update button states accordingly
 						};
 
@@ -282,20 +711,25 @@ header {
 				} else {
 					document.documentElement.setAttribute('data-theme', 'light');
 					document.getElementById('broccoliBob').classList.add('d-none');
+					document.getElementById('broccoliBob').classList.remove('showBob');
+					document.getElementById('interactionBob').classList.add('d-none');
 				}
 			}
 
+			function updateGenerateButtonState() {
+				const uploadedImageSrc = document.getElementById('uploadedImage').getAttribute('src');
+				const isImageUploaded = uploadedImageSrc !== null && uploadedImageSrc !== '';
+				const isGenreSelected = genre !== '' && genre !== undefined;
+				document.getElementById('generateText').disabled = !(isImageUploaded && isGenreSelected);
 
-function updateGenerateButtonState() {
-  const uploadedImageSrc = document.getElementById('uploadedImage').getAttribute('src');
-  const isImageUploaded = uploadedImageSrc !== null && uploadedImageSrc !== '';
-  const isGenreSelected = genre !== '' && genre !== undefined;
-  document.getElementById('generateText').disabled = !(isImageUploaded && isGenreSelected);
-}
-
+				if (isImageUploaded && isGenreSelected) {
+					document.getElementById('uploadInfo').classList.add('d-none');
+				}
+			}
 
 			async function generateLyrics() {
 				document.getElementById('loader').classList.remove('d-none'); // Show loader
+				document.getElementById('deleteImage').classList.add('d-none'); // Show loader
 
 				document.getElementById('generateText').disabled = true;
 				document.getElementById('rock').disabled = true;
@@ -307,8 +741,6 @@ function updateGenerateButtonState() {
 				document.getElementById('country').disabled = true;
 				document.getElementById('pop').disabled = true;
 				document.getElementById('banana').disabled = true;
-
-
 
 				const image = imgUpload;
 				const formData = new FormData();
@@ -348,6 +780,10 @@ function updateGenerateButtonState() {
 					document.getElementById('modelResponse').textContent = 'Error processing request.';
 				} finally {
 					document.getElementById('loader').classList.add('d-none'); // Hide loader
+					document.getElementById('generateText').classList.add('d-none');
+					document.getElementById('reset').classList.remove('d-none');
+					document.getElementById('modelResponse').classList.remove('d-none')
+	
 				}
 			}
 
@@ -364,12 +800,26 @@ function updateGenerateButtonState() {
 				document.getElementById('banana').disabled = false;
 				document.getElementById('uploadedImage').src = '';
 				document.getElementById('imageInput').src = '';
+				document.getElementById('uploadInfo').classList.remove('d-none');
+				document.getElementById('dropArea').classList.remove('d-none');
+				document.getElementById('uploadImageBtn').classList.remove('d-none');
+				document.getElementById('uploadImageText').classList.remove('d-none');
+				document.getElementById('generateText').classList.remove('d-none');
+				
+				document.getElementById('reset').classList.add('d-none');
+				document.getElementById('uploadedImage').classList.add('d-none');
+				document.getElementById('deleteImage').classList.add('d-none');
+				document.getElementById('modelResponse').innerHTML = '';
+				document.getElementById('modelResponse').classList.add('d-none');
+
 
 				document.getElementById(genre).classList.remove('selectedGenre');
 				setGenre('');
 			}
 
 			function startRecording() {
+				document.getElementById('startRecord').classList.add('d-none');
+				document.getElementById('stopRecord').classList.remove('d-none');
 				navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
 					mediaRecorder = new MediaRecorder(stream);
 					mediaRecorder.start();
@@ -393,7 +843,7 @@ function updateGenerateButtonState() {
 				if (!isRecording) return;
 				mediaRecorder.stop();
 				isRecording = false;
-				document.getElementById('stopRecord').disabled = true;
+				document.getElementById('stopRecord').classList.add('d-none');
 			}
 
 			// Function to send audio to server and process the response
@@ -416,18 +866,70 @@ function updateGenerateButtonState() {
 					.catch((error) => console.error('Error:', error));
 			}
 
-      function deleteImage() {
-        document.getElementById('imageInput').value = '';
-        document.getElementById('fileElem').value = '';
-        document.getElementById('uploadedImage').src = '';
-        document.getElementById('deleteImage').classList.add('d-none');
-        updateGenerateButtonState();
-      }
+			function deleteImage() {
+				document.getElementById('imageInput').value = '';
+				document.getElementById('fileElem').value = '';
+				document.getElementById('uploadedImage').classList.add('d-none');
+				document.getElementById('uploadedImage').src = '';
+				document.getElementById('deleteImage').classList.add('d-none');
+				document.getElementById('dropArea').classList.remove('d-none');
+				document.getElementById('uploadImageText').classList.remove('d-none');
+				document.getElementById('uploadImageBtn').classList.remove('d-none');
+				updateGenerateButtonState();
+			}
+
+			function showBob() {
+				document.getElementById('broccoliBob').classList.add('showBob');
+
+				setTimeout(function () {
+					document.getElementById('interactionBob').classList.remove('d-none');
+				}, 3000); // 2000 milliseconds = 2 seconds
+			}
+
+			function createEmoji(emojiChar) {
+				const emoji = document.createElement('div');
+				emoji.textContent = emojiChar;
+				emoji.className = 'emoji';
+				document.getElementById('emojis').appendChild(emoji);
+				return emoji;
+			}
+
+			function moveEmoji(emoji, speed) {
+				let x = Math.random() * document.getElementById('emojis').offsetWidth;
+				let y = Math.random() * document.getElementById('emojis').offsetHeight;
+				let dx = (Math.random() - 0.5) * speed;
+				let dy = (Math.random() - 0.5) * speed;
+
+				function animate() {
+					const emojisDiv = document.getElementById('emojis');
+					const maxX = emojisDiv.offsetWidth - emoji.offsetWidth;
+					const maxY = emojisDiv.offsetHeight - emoji.offsetHeight;
+
+					x += dx;
+					y += dy;
+
+					if (x <= 0 || x >= maxX) dx *= -1;
+					if (y <= 0 || y >= maxY) dy *= -1;
+
+					emoji.style.left = x + 'px';
+					emoji.style.top = y + 'px';
+
+					requestAnimationFrame(animate);
+				}
+
+				animate();
+			}
+
+			emojis.forEach((emojiChar) => {
+				const emoji = createEmoji(emojiChar);
+				moveEmoji(emoji, speed);
+			});
 
 			updateGenerateButtonState();
 		</script>
 	</body>
 </html>
+
 
 	`;
 	return c.html(html);
