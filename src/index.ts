@@ -165,12 +165,15 @@ header {
 				<button id="hiphop" class="genreButton" onclick="setGenre('hiphop')">Hip Hop</button>
 				<button id="country" class="genreButton" onclick="setGenre('country')">Country</button>
 				<button id="pop" class="genreButton" onclick="setGenre('pop')">Pop</button>
-				<button id="banana" class="genreButton" class="d-none" onclick="setGenre('banana')">Banana</button>
+				<button id="banana" class="genreButton d-none" onclick="setGenre('banana')">Banana</button>
 			</div>
 
 			<button onclick="restart()">Restart</button>
 
-			<input type="file" id="imageInput" accept="image/*" />
+
+			<button onclick="imageInput.click()">Upload Image</button>
+      <button id="deleteImage" onclick="deleteImage()" class="d-none">Delete Image</button>
+			<input type="file" id="imageInput" class="d-none" accept="image/*" />
 			<div id="dropArea" class="drop-area">
 				Drop Your Files Here
 				<input type="file" id="fileElem" multiple accept="image/*" class="file-elem" />
@@ -218,18 +221,6 @@ header {
 				updateGenerateButtonState();
 			}
 
-			// document.getElementById('imageInput').addEventListener('change', function (e) {
-			// 	if (e.target.files.length > 0) {
-			// 		const reader = new FileReader();
-			// 		reader.onload = function (e) {
-			// 			document.getElementById('uploadedImage').src = e.target.result;
-			// 			document.getElementById('uploadedImage').style.display = 'block';
-			// 			updateGenerateButtonState();
-			// 		};
-			// 		reader.readAsDataURL(e.target.files[0]);
-			// 	}
-			// });
-
 			document.addEventListener('DOMContentLoaded', (event) => {
 				const dropArea = document.getElementById('dropArea');
 				const fileInput = document.getElementById('fileElem');
@@ -242,6 +233,7 @@ header {
 						// Process the first file (if multiple, you would need to loop through)
 						const file = files[0];
             imgUpload = file;
+            document.getElementById('deleteImage').classList.remove('d-none')
 						const reader = new FileReader();
 
 						reader.onload = function (e) {
@@ -293,11 +285,12 @@ header {
 				}
 			}
 
-      function updateGenerateButtonState() {
-    const uploadedImage = document.getElementById('uploadedImage');
-    const isImageUploaded = uploadedImage && uploadedImage.src;
-    const isGenreSelected = genre !== '' && genre !== undefined;
-    document.getElementById('generateText').disabled = !(isImageUploaded && isGenreSelected);
+
+function updateGenerateButtonState() {
+  const uploadedImageSrc = document.getElementById('uploadedImage').getAttribute('src');
+  const isImageUploaded = uploadedImageSrc !== null && uploadedImageSrc !== '';
+  const isGenreSelected = genre !== '' && genre !== undefined;
+  document.getElementById('generateText').disabled = !(isImageUploaded && isGenreSelected);
 }
 
 
@@ -422,6 +415,14 @@ header {
 					})
 					.catch((error) => console.error('Error:', error));
 			}
+
+      function deleteImage() {
+        document.getElementById('imageInput').value = '';
+        document.getElementById('fileElem').value = '';
+        document.getElementById('uploadedImage').src = '';
+        document.getElementById('deleteImage').classList.add('d-none');
+        updateGenerateButtonState();
+      }
 
 			updateGenerateButtonState();
 		</script>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>ImageHarmony</title>
+		<link rel="stylesheet" href="test.css" />
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+		/>
+	</head>
+	<body>
+		<header>
+			<h1>Welcome to ImageHarmony</h1>
+			<button onclick="toggleDarkMode()" id="themeToggle">Toggle Dark Mode</button>
+		</header>
+		<section class="inputSection">
+			<div class="buttonContainer">
+				<button id="rock" class="genreButton" onclick="setGenre('rock')">Rock</button>
+				<button id="classic" class="genreButton" onclick="setGenre('classic')">Classic</button>
+				<button id="love" class="genreButton" onclick="setGenre('love')">Love</button>
+				<button id="kpop" class="genreButton" onclick="setGenre('kpop')">K-pop</button>
+				<button id="kids" class="genreButton" onclick="setGenre('kids')">Kids</button>
+				<button id="hiphop" class="genreButton" onclick="setGenre('hiphop')">Hip Hop</button>
+				<button id="country" class="genreButton" onclick="setGenre('country')">Country</button>
+				<button id="pop" class="genreButton" onclick="setGenre('pop')">Pop</button>
+				<button id="banana" class="genreButton d-none" onclick="setGenre('banana')">Banana</button>
+			</div>
+			<div class="imgContainer">
+				<div id="uploadImageText">
+					<span class="material-symbols-outlined uploadIcon"> upload </span>
+					<span
+						>Drag & Drop to Upload Image <br />
+						or</span
+					>
+				</div>
+				<input type="file" id="imageInput" class="d-none" accept="image/*" />
+				<div id="dropArea" class="drop-area">
+					<input type="file" id="fileElem" multiple accept="image/*" class="file-elem" />
+				</div>
+
+				<img id="uploadedImage" class="d-none" />
+				<button id="uploadImageBtn" onclick="imageInput.click()" class="imgButton">Upload Image</button>
+				<button id="deleteImage" onclick="deleteImage()" class="d-none">
+					<span class="material-symbols-outlined deleteIcon"> delete </span>
+				</button>
+			</div>
+		</section>
+
+		<section class="outputSection">
+			<button id="generateText" onclick="generateLyrics()">Generate Lyrics</button>
+			<button onclick="restart()">Restart</button>
+
+			<div id="modelResponse"></div>
+			<div id="loader" class="d-none">
+				<div class="loader"></div>
+			</div>
+		</section>
+
+		<div id="broccoliBob" class="d-none">
+			<img
+				class="imgBroccoliBob"
+				src="https://github.com/flos-code/DA-Bubble/assets/148456982/b03d5b7a-d0e4-4f8c-88d8-01a531407f27"
+				alt="broccoli bob"
+			/>
+			<div>Hey broccoli bob here</div>
+			<button id="startRecord">Start Recording</button>
+			<button id="stopRecord" disabled>Stop Recording</button>
+			<div id="wrongCode" class="d-none">sorry wrong code</div>
+		</div>
+
+		<script>
+			let imgDescription = '';
+			let lyricsTemplate = '';
+			let genre = '';
+			let isDarkMode = false;
+			let imgUpload;
+
+			let mediaRecorder;
+			let audioChunks = [];
+			let isRecording = false;
+
+			document.getElementById('startRecord').addEventListener('click', startRecording);
+			document.getElementById('stopRecord').addEventListener('click', stopRecording);
+
+			function setGenre(selectedGenre) {
+				if (genre !== '') {
+					document.getElementById(genre).classList.remove('selectedGenre');
+				}
+				document.getElementById(selectedGenre).classList.add('selectedGenre');
+				genre = selectedGenre;
+				updateGenerateButtonState();
+			}
+
+			document.addEventListener('DOMContentLoaded', (event) => {
+				const dropArea = document.getElementById('dropArea');
+				const fileInput = document.getElementById('fileElem');
+				const imageInput = document.getElementById('imageInput');
+
+				// Function to handle files from both drag-and-drop and file input
+				function handleFiles(files) {
+					// Check if any files were uploaded
+					if (files.length > 0) {
+						// Process the first file (if multiple, you would need to loop through)
+						const file = files[0];
+						imgUpload = file;
+						document.getElementById('deleteImage').classList.remove('d-none');
+						document.getElementById('dropArea').classList.add('d-none');
+						document.getElementById('uploadImageText').classList.add('d-none');
+						document.getElementById('uploadImageBtn').classList.add('d-none');
+						const reader = new FileReader();
+
+						reader.onload = function (e) {
+							// Update the display with the image
+							document.getElementById('uploadedImage').src = e.target.result;
+							document.getElementById('uploadedImage').classList.remove('d-none');
+							updateGenerateButtonState(); // Update button states accordingly
+						};
+
+						reader.readAsDataURL(file); // Read the file to display it
+					}
+				}
+
+				// Drag-and-drop events
+				dropArea.addEventListener('dragover', (e) => {
+					e.preventDefault();
+					dropArea.classList.add('active');
+				});
+
+				dropArea.addEventListener('dragleave', (e) => {
+					dropArea.classList.remove('active');
+				});
+
+				dropArea.addEventListener('drop', (e) => {
+					e.preventDefault();
+					dropArea.classList.remove('active');
+					handleFiles(e.dataTransfer.files);
+				});
+
+				// Change event for the hidden file input
+				fileInput.addEventListener('change', (e) => {
+					handleFiles(e.target.files);
+				});
+
+				// Change event for the visible file input
+				imageInput.addEventListener('change', (e) => {
+					handleFiles(e.target.files);
+				});
+			});
+
+			function toggleDarkMode() {
+				const theme = document.documentElement.getAttribute('data-theme');
+				if (theme === 'light') {
+					document.documentElement.setAttribute('data-theme', 'dark');
+					document.getElementById('broccoliBob').classList.remove('d-none');
+				} else {
+					document.documentElement.setAttribute('data-theme', 'light');
+					document.getElementById('broccoliBob').classList.add('d-none');
+				}
+			}
+
+			function updateGenerateButtonState() {
+				const uploadedImageSrc = document.getElementById('uploadedImage').getAttribute('src');
+				const isImageUploaded = uploadedImageSrc !== null && uploadedImageSrc !== '';
+				const isGenreSelected = genre !== '' && genre !== undefined;
+				document.getElementById('generateText').disabled = !(isImageUploaded && isGenreSelected);
+			}
+
+			async function generateLyrics() {
+				document.getElementById('loader').classList.remove('d-none'); // Show loader
+
+				document.getElementById('generateText').disabled = true;
+				document.getElementById('rock').disabled = true;
+				document.getElementById('classic').disabled = true;
+				document.getElementById('love').disabled = true;
+				document.getElementById('kpop').disabled = true;
+				document.getElementById('kids').disabled = true;
+				document.getElementById('hiphop').disabled = true;
+				document.getElementById('country').disabled = true;
+				document.getElementById('pop').disabled = true;
+				document.getElementById('banana').disabled = true;
+
+				const image = imgUpload;
+				const formData = new FormData();
+				formData.append('image', image);
+
+				try {
+					// Step 1: Generate the image description
+					const descriptionResponse = await fetch('/generate-text', {
+						method: 'POST',
+						body: formData,
+					});
+					const descriptionResult = await descriptionResponse.json();
+					imgDescription = descriptionResult.description;
+
+					// Step 2: Rephrase the image description (simulate with /query)
+					const rephraseResponse = await fetch('/query', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ content: imgDescription, mode: genre }),
+					});
+					const rephraseResult = await rephraseResponse.json();
+					const rephrasedDescription = rephraseResult.output; // Assuming output contains rephrased description
+
+					// Step 3: Generate lyrics based on the rephrased description
+					const lyricsResponse = await fetch('/lyrics', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ content: rephrasedDescription, mode: genre }),
+					});
+					const lyricsResult = await lyricsResponse.json();
+					const lyrics = lyricsResult.output; // Assuming output contains the final lyrics
+
+					// Display the final lyrics
+					document.getElementById('modelResponse').textContent = lyrics;
+				} catch (error) {
+					console.error('Error:', error);
+					document.getElementById('modelResponse').textContent = 'Error processing request.';
+				} finally {
+					document.getElementById('loader').classList.add('d-none'); // Hide loader
+				}
+			}
+
+			function restart() {
+				document.getElementById('generateText').disabled = true;
+				document.getElementById('rock').disabled = false;
+				document.getElementById('classic').disabled = false;
+				document.getElementById('love').disabled = false;
+				document.getElementById('kpop').disabled = false;
+				document.getElementById('kids').disabled = false;
+				document.getElementById('hiphop').disabled = false;
+				document.getElementById('country').disabled = false;
+				document.getElementById('pop').disabled = false;
+				document.getElementById('banana').disabled = false;
+				document.getElementById('uploadedImage').src = '';
+				document.getElementById('imageInput').src = '';
+
+				document.getElementById(genre).classList.remove('selectedGenre');
+				setGenre('');
+			}
+
+			function startRecording() {
+				navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+					mediaRecorder = new MediaRecorder(stream);
+					mediaRecorder.start();
+					audioChunks = [];
+					isRecording = true;
+					document.getElementById('stopRecord').disabled = false;
+
+					mediaRecorder.addEventListener('dataavailable', (event) => {
+						audioChunks.push(event.data);
+					});
+
+					mediaRecorder.addEventListener('stop', () => {
+						const audioBlob = new Blob(audioChunks);
+						sendAudioToServer(audioBlob);
+					});
+				});
+			}
+
+			// Function to stop recording
+			function stopRecording() {
+				if (!isRecording) return;
+				mediaRecorder.stop();
+				isRecording = false;
+				document.getElementById('stopRecord').disabled = true;
+			}
+
+			// Function to send audio to server and process the response
+			function sendAudioToServer(audioBlob) {
+				const formData = new FormData();
+				formData.append('audio', audioBlob);
+
+				fetch('/analyze-audio', { method: 'POST', body: formData })
+					.then((response) => response.json())
+					.then((data) => {
+						// Check if the transcription contains 'banana' or 'bananas'
+						if (data.transcription.toLowerCase().includes('banana')) {
+							document.getElementById('banana').classList.remove('d-none');
+							document.getElementById('wrongCode').classList.add('d-none');
+						} else {
+							document.getElementById('wrongCode').classList.remove('d-none');
+							document.getElementById('banana').classList.add('d-none');
+						}
+					})
+					.catch((error) => console.error('Error:', error));
+			}
+
+			function deleteImage() {
+				document.getElementById('imageInput').value = '';
+				document.getElementById('fileElem').value = '';
+				document.getElementById('uploadedImage').classList.add('d-none');
+				document.getElementById('uploadedImage').src = '';
+				document.getElementById('deleteImage').classList.add('d-none');
+				document.getElementById('dropArea').classList.remove('d-none');
+				document.getElementById('uploadImageText').classList.remove('d-none');
+				document.getElementById('uploadImageBtn').classList.remove('d-none');
+				updateGenerateButtonState();
+			}
+
+			updateGenerateButtonState();
+		</script>
+	</body>
+</html>
