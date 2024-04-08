@@ -39,7 +39,7 @@ body {
 
 #emojis {
 	position: absolute;
-	inset: 16px;
+	inset: 40px;
 	z-index: -1;
 }
 
@@ -99,6 +99,12 @@ header {
 
 .genreButton:active {
 	background: var(--accent);
+}
+
+.genreButton:disabled {
+	cursor: not-allowed !important;
+	background: lightgray !important;
+	color: gray;
 }
 
 .selectedGenre {
@@ -214,7 +220,7 @@ header {
 	font-size: 20px;
 }
 
-.uploadInfo {
+#uploadInfo {
 	text-align: center;
 }
 
@@ -271,6 +277,77 @@ header {
 	overflow-y: scroll;
 }
 
+.loadingStep {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.step1Icon {
+	animation: step1Movement 4s linear infinite;
+}
+
+@keyframes step1Movement {
+	0% {
+		transform: translate(-6px, -6px);
+	}
+	25% {
+		transform: translate(6px, 6px);
+	}
+	50% {
+		transform: translate(6px, -6px);
+	}
+	75% {
+		transform: translate(-6px, 6px);
+	}
+	100% {
+		transform: translate(-6px, -6px);
+	}
+}
+
+.step2Icon {
+	animation: step2Movement 2s ease-in-out infinite;
+	transform-origin: bottom center;
+}
+
+@keyframes step2Movement {
+	0%,
+	100% {
+		transform: rotate(-10deg);
+	}
+	50% {
+		transform: rotate(10deg);
+	}
+}
+
+.step3Icon {
+	animation: step3Movement 4s linear infinite;
+}
+
+@keyframes step3Movement {
+	0% {
+		transform: translate(-6px, -6px);
+	}
+	17% {
+		transform: translate(6px, -6px);
+	}
+	33% {
+		transform: translate(-6px, -3px);
+	}
+	50% {
+		transform: translate(6px, -3px);
+	}
+	67% {
+		transform: translate(-6px, 0);
+	}
+	83% {
+		transform: translate(6px, 0);
+	}
+	100% {
+		transform: translate(-6px, -6px);
+	}
+}
+
 .loader-container {
 	display: flex;
 	width: 46px;
@@ -324,7 +401,19 @@ header {
 	transform-origin: center center;
 	transform: rotate(30deg) translateX(-120px);
 	display: flex;
+	transition: opacity 3s ease-out;
 	/* Removed the transition property because we will use animations */
+}
+
+.byeBob {
+	opacity: 0;
+}
+
+#bobThinking {
+	position: absolute;
+	width: 40px;
+	left: 80px;
+	top: 32px;
 }
 
 /* Define a keyframe for moving Bob horizontally */
@@ -479,4 +568,117 @@ header {
 
 input:checked ~ .toggle span {
 	left: 2em;
+}
+
+@media screen and (max-width: 1200px) {
+	header {
+		margin: 16px calc((100vw - 650px) / 2);
+	}
+
+	.inputSection {
+		margin: 0 calc((100vw - 650px) / 2);
+	}
+
+	.outputSection {
+		margin: 32px 0 0 calc(((100vw / 2) - 190px));
+	}
+
+	#broccoliBob {
+		position: relative;
+		top: unset;
+		margin-top: 32px;
+		transform-origin: bottom left;
+	}
+}
+
+@media screen and (max-width: 800px) {
+	header {
+		margin: 16px 32px;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+	}
+
+	h1 {
+		margin-block: unset;
+	}
+
+	.inputSection {
+		flex-direction: column;
+		align-items: flex-start;
+		margin: 0 32px;
+		gap: 8px;
+	}
+
+	.outputSection {
+		margin: 16px 32px;
+	}
+}
+
+@media screen and (max-width: 500px) {
+	header {
+		margin: 16px 16px;
+	}
+
+	h1 {
+		font-size: 24px;
+	}
+
+	.toggle {
+		font-size: 0.8rem;
+	}
+
+	.inputSection {
+		margin: 0 16px;
+	}
+
+	.buttonContainer {
+		gap: 3px;
+		padding: 3px;
+		width: 288px;
+	}
+
+	.genreButton {
+		width: 92px;
+		height: 54px;
+		font-size: 20px;
+	}
+
+	.imgContainer {
+		width: 200px;
+		height: 200px;
+	}
+
+	#uploadImageText {
+		font-size: 16px;
+		top: 24px;
+	}
+
+	#uploadImageBtn {
+		top: 140px;
+		white-space: nowrap;
+	}
+
+	.emoji {
+		font-size: 24px;
+	}
+
+	.outputSection {
+		margin: 16px 16px;
+		padding: 8px 8px;
+		width: 288px;
+	}
+
+	.imgBroccoliBob {
+		width: 150px;
+		height: 150px;
+	}
+
+	#interactionBob {
+		margin-left: -48px;
+	}
+
+	.chatBob {
+		width: 200px;
+	}
 }

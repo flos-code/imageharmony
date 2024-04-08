@@ -20,7 +20,11 @@ app.get('/', async (c) => {
 			rel="stylesheet"
 			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
 		/>
-		<link rel="icon" type="image/x-icon" href="https://github.com/flos-code/DA-Bubble/assets/148456982/dc1a4eb1-42e4-49f6-b32f-b27b7c3ec286">
+		<link
+			rel="icon"
+			type="image/x-icon"
+			href="https://github.com/flos-code/DA-Bubble/assets/148456982/dc1a4eb1-42e4-49f6-b32f-b27b7c3ec286"
+		/>
 
 <style>
 	:root[data-theme='light'] {
@@ -313,35 +317,36 @@ header {
 }
 
 @keyframes step1Movement {
-  0% {
-    transform: translate(-6px, -6px);
-  }
-  25% {
-    transform: translate(6px, 6px);
-  }
-  50% {
-    transform: translate(6px, -6px);
-  }
-  75% {
-    transform: translate(-6px, 6px);
-  }
-  100% {
-    transform: translate(-6px, -6px);
-  }
+	0% {
+		transform: translate(-6px, -6px);
+	}
+	25% {
+		transform: translate(6px, 6px);
+	}
+	50% {
+		transform: translate(6px, -6px);
+	}
+	75% {
+		transform: translate(-6px, 6px);
+	}
+	100% {
+		transform: translate(-6px, -6px);
+	}
 }
 
 .step2Icon {
 	animation: step2Movement 2s ease-in-out infinite;
-  transform-origin: bottom center;
+	transform-origin: bottom center;
 }
 
 @keyframes step2Movement {
-	0%, 100% {
-    transform: rotate(-10deg);
-  }
-  50% {
-    transform: rotate(10deg);
-  }
+	0%,
+	100% {
+		transform: rotate(-10deg);
+	}
+	50% {
+		transform: rotate(10deg);
+	}
 }
 
 .step3Icon {
@@ -349,29 +354,28 @@ header {
 }
 
 @keyframes step3Movement {
-  0% {
-    transform: translate(-6px, -6px);
-  }
-  17% {
-    transform: translate(6px, -6px);
-  }
-  33% {
-    transform: translate(-6px, -3px);
-  }
-  50% {
-    transform: translate(6px, -3px);
-  }
-  67% {
-    transform: translate(-6px, 0);
-  }
-  83% {
-    transform: translate(6px, 0);
-  }
-  100% {
-    transform: translate(-6px, -6px);
-  }
+	0% {
+		transform: translate(-6px, -6px);
+	}
+	17% {
+		transform: translate(6px, -6px);
+	}
+	33% {
+		transform: translate(-6px, -3px);
+	}
+	50% {
+		transform: translate(6px, -3px);
+	}
+	67% {
+		transform: translate(-6px, 0);
+	}
+	83% {
+		transform: translate(6px, 0);
+	}
+	100% {
+		transform: translate(-6px, -6px);
+	}
 }
-
 
 .loader-container {
 	display: flex;
@@ -435,10 +439,10 @@ header {
 }
 
 #bobThinking {
-    position: absolute;
-    width: 40px;
-    left: 80px;
-    top: 32px;
+	position: absolute;
+	width: 40px;
+	left: 80px;
+	top: 32px;
 }
 
 /* Define a keyframe for moving Bob horizontally */
@@ -595,9 +599,130 @@ input:checked ~ .toggle span {
 	left: 2em;
 }
 
+@media screen and (max-width: 1200px) {
+	header {
+		margin: 16px calc((100vw - 650px) / 2);
+	}
+
+	.inputSection {
+		margin: 0 calc((100vw - 650px) / 2);
+	}
+
+	.outputSection {
+		margin: 32px 0 0 calc(((100vw / 2) - 190px));
+	}
+
+	#broccoliBob {
+		position: relative;
+		top: unset;
+		margin-top: 32px;
+		transform-origin: bottom left;
+	}
+}
+
+@media screen and (max-width: 800px) {
+	header {
+		margin: 16px 32px;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+	}
+
+	h1 {
+		margin-block: unset;
+	}
+
+	.inputSection {
+		flex-direction: column;
+		align-items: flex-start;
+		margin: 0 32px;
+		gap: 8px;
+	}
+
+	.outputSection {
+		margin: 16px 32px;
+	}
+}
+
+@media screen and (max-width: 500px) {
+	header {
+		margin: 16px 16px;
+	}
+
+	h1 {
+		font-size: 24px;
+	}
+
+	.toggle {
+		font-size: 0.8rem;
+	}
+
+	.inputSection {
+		margin: 0 16px;
+	}
+
+	.buttonContainer {
+		gap: 3px;
+		padding: 3px;
+		width: 288px;
+	}
+
+	.genreButton {
+		width: 92px;
+		height: 54px;
+		font-size: 20px;
+	}
+
+	.imgContainer {
+		width: 200px;
+		height: 200px;
+	}
+
+	#uploadImageText {
+		font-size: 16px;
+		top: 24px;
+	}
+
+	#uploadImageBtn {
+		top: 140px;
+		white-space: nowrap;
+	}
+
+	.emoji {
+		font-size: 24px;
+	}
+
+	.outputSection {
+		margin: 16px 16px;
+		padding: 8px 8px;
+		width: 288px;
+	}
+
+	.imgBroccoliBob {
+		width: 150px;
+		height: 150px;
+	}
+
+	#bobThinking {
+		left: 60px;
+    	width: 32px;
+	}
+
+	#uploadedImage { 
+		width: 200px;
+		height: 200px;
+	}
+
+	#interactionBob {
+		margin-left: -48px;
+	}
+
+	.chatBob {
+		width: 200px;
+	}
+}
+
 </style>
-
-
 	</head>
 	<body>
 		<header>
@@ -641,18 +766,61 @@ input:checked ~ .toggle span {
 			</div>
 		</section>
 
+		<div id="broccoliBob" onclick="showBob()" class="d-none">
+			<img
+				class="imgBroccoliBob"
+				src="https://github.com/flos-code/DA-Bubble/assets/148456982/b03d5b7a-d0e4-4f8c-88d8-01a531407f27"
+				alt="broccoli bob"
+			/>
+			<img
+				id="bobThinking"
+				class="d-none"
+				src="https://github.com/flos-code/flos-code/assets/148456982/5d2f908b-94f4-4d19-9a30-76bd48087831"
+				alt="Bob is thinking"
+			/>
+			<div id="interactionBob" class="d-none">
+				<div class="chatBob">
+					<div class="messageBob">
+						Hey, Broccoli Bob here, it's clear that I'm the king of vegetables, but one question is bothering me for a long time. Tell me
+						which fruit is the superior one?
+					</div>
+
+					<div id="messageUser1" class="messageUser d-none"></div>
+					<div id="wrongCode" class="d-none messageBob">
+						You better think about it again and you will realize that there can only be one right answer.
+					</div>
+					<div id="bananaCode" class="d-none messageBob">I knew it, I can feel it when I have a banana connoisseur in front of me.</div>
+					<div id="appleCode" class="d-none messageBob">
+						Congratulations, it was a test and you failed with flying colors! What makes you think that apples are the superior fruit...
+					</div>
+
+					<div id="messageUser2" class="messageUser d-none"></div>
+
+					<div id="wrongCode2" class="d-none messageBob">Hm maybe thinking is not your strength, see you around.</div>
+					<div id="appleCode2" class="d-none messageBob">gave you a second chance ... wrongly. Bye.</div>
+					<div id="bananaCode2" class="d-none messageBob">Ding Ding Ding, we have a winner your totally right!</div>
+				</div>
+
+				<button class="btnBob" id="startRecord">Talk to Bob <span class="material-symbols-outlined"> mic </span></button>
+				<button class="btnBob d-none" id="stopRecord" disabled>Nuff said <span class="material-symbols-outlined"> mic_off </span></button>
+			</div>
+		</div>
+
 		<section class="outputSection">
 			<span id="uploadInfo">In order to generate lyrics, please select and genre and provide an image.</span>
 			<button id="generateText" onclick="generateLyrics()">Generate Lyrics</button>
 			<button id="reset" onclick="restart()" class="d-none">Restart</button>
-			<div id="step1" class="loadingStep d-none">analyzing image 
+			<div id="step1" class="loadingStep d-none">
+				analyzing image
 				<span class="material-symbols-outlined step1Icon">search</span>
 			</div>
-			<div id="step2" class="loadingStep d-none" >calling songwriter
-			<span class="material-symbols-outlined step2Icon">phone_iphone</span>
+			<div id="step2" class="loadingStep d-none">
+				calling songwriter
+				<span class="material-symbols-outlined step2Icon">phone_iphone</span>
 			</div>
-			<div id="step3" class="loadingStep d-none" >creating lyrics
-			<span class="material-symbols-outlined step3Icon">edit</span>
+			<div id="step3" class="loadingStep d-none">
+				creating lyrics
+				<span class="material-symbols-outlined step3Icon">edit</span>
 			</div>
 			<div id="loader" class="loader-container d-none">
 				<div class="square"></div>
@@ -661,54 +829,8 @@ input:checked ~ .toggle span {
 				<div class="square"></div>
 			</div>
 
-			<div id="modelResponse" class="d-none">
-			</div>
+			<div id="modelResponse" class="d-none"></div>
 		</section>
-
-		<div id="broccoliBob" onclick="showBob()" class="d-none">
-			<img
-				class="imgBroccoliBob"
-				src="https://github.com/flos-code/DA-Bubble/assets/148456982/b03d5b7a-d0e4-4f8c-88d8-01a531407f27"
-				alt="broccoli bob"
-			/>
-			<img id="bobThinking" class="d-none" src="https://github.com/flos-code/flos-code/assets/148456982/5d2f908b-94f4-4d19-9a30-76bd48087831" alt="Bob is thinking">
-			<div id="interactionBob" class="d-none">
-				<div class="chatBob">
-					<div class="messageBob">
-						Hey, Broccoli Bob here, it's clear that I'm the king of vegetables, but one question is bothering me for a long time. Tell me
-						which fruit is the superior one?
-					</div>
-
-					<div id="messageUser1" class="messageUser d-none">
-					
-					</div>
-					<div id="wrongCode" class="d-none messageBob">
-					You better think about it again and you will realize that there can only be one right answer.
-					</div>
-					<div id="bananaCode" class="d-none messageBob">
-					I knew it, I can feel it when I have a banana connoisseur in front of me.
-
-					</div>
-					<div id="appleCode" class="d-none messageBob">
-					Congratulations, it was a test and you failed with flying colors! What makes you think that apples are the superior fruit...
-					</div>
-
-					<div id="messageUser2" class="messageUser d-none"> </div>
-
-					<div id="wrongCode2" class="d-none messageBob">
-					wrong2
-					</div>
-					<div id="bananaCode2" class="d-none messageBob">
-					banan2
-
-					</div>
-		
-				</div>
-
-				<button class="btnBob" id="startRecord">Talk to Bob <span class="material-symbols-outlined"> mic </span></button>
-				<button class="btnBob d-none" id="stopRecord" disabled>Nuff said <span class="material-symbols-outlined"> mic_off </span></button>
-			</div>
-		</div>
 
 		<script>
 			let imgDescription = '';
@@ -832,7 +954,6 @@ input:checked ~ .toggle span {
 					document.getElementById('broccoliBob').classList.add('d-none');
 					document.getElementById('broccoliBob').classList.remove('showBob');
 					document.getElementById('interactionBob').classList.add('d-none');
-			
 				}
 			}
 
@@ -907,8 +1028,7 @@ input:checked ~ .toggle span {
 					document.getElementById('loader').classList.add('d-none'); // Hide loader
 					document.getElementById('generateText').classList.add('d-none');
 					document.getElementById('reset').classList.remove('d-none');
-					document.getElementById('modelResponse').classList.remove('d-none')
-	
+					document.getElementById('modelResponse').classList.remove('d-none');
 				}
 			}
 
@@ -930,13 +1050,12 @@ input:checked ~ .toggle span {
 				document.getElementById('uploadImageBtn').classList.remove('d-none');
 				document.getElementById('uploadImageText').classList.remove('d-none');
 				document.getElementById('generateText').classList.remove('d-none');
-				
+
 				document.getElementById('reset').classList.add('d-none');
 				document.getElementById('uploadedImage').classList.add('d-none');
 				document.getElementById('deleteImage').classList.add('d-none');
 				document.getElementById('modelResponse').innerHTML = '';
 				document.getElementById('modelResponse').classList.add('d-none');
-
 
 				document.getElementById(genre).classList.remove('selectedGenre');
 				setGenre('');
@@ -969,7 +1088,7 @@ input:checked ~ .toggle span {
 				mediaRecorder.stop();
 				isRecording = false;
 				document.getElementById('stopRecord').classList.add('d-none');
-				mediaRecorder.stream.getTracks().forEach(track => track.stop());
+				mediaRecorder.stream.getTracks().forEach((track) => track.stop());
 			}
 
 			function sendAudioToServer(audioBlob) {
@@ -981,40 +1100,38 @@ input:checked ~ .toggle span {
 				fetch('/analyze-audio', { method: 'POST', body: formData })
 					.then((response) => response.json())
 					.then((data) => {
-
-
 						if (attemptCount === 1) {
 							document.getElementById('bobThinking').classList.add('d-none');
-						document.getElementById('messageUser1').classList.remove('d-none');
-						document.getElementById('messageUser1').textContent = data.transcription;
-						if (data.transcription.toLowerCase().includes('banana')) {
-							document.getElementById('banana').classList.remove('d-none');
-							document.getElementById('bananaCode').classList.remove('d-none');
-							setGenre('banana');
-						} else if (data.transcription.toLowerCase().includes('apple')){
-							document.getElementById('appleCode').classList.remove('d-none');
-							chatFailed();
+							document.getElementById('messageUser1').classList.remove('d-none');
+							document.getElementById('messageUser1').textContent = data.transcription;
+							if (data.transcription.toLowerCase().includes('banana')) {
+								document.getElementById('banana').classList.remove('d-none');
+								document.getElementById('bananaCode').classList.remove('d-none');
+								setGenre('banana');
+							} else if (data.transcription.toLowerCase().includes('apple')) {
+								document.getElementById('appleCode').classList.remove('d-none');
+								chatFailed();
+							} else {
+								document.getElementById('wrongCode').classList.remove('d-none');
+								chatRetry();
+							}
 						} else {
-							document.getElementById('wrongCode').classList.remove('d-none')
-							chatRetry();
-						}}
-						else {
-
 							document.getElementById('bobThinking').classList.add('d-none');
-						document.getElementById('messageUser2').classList.remove('d-none');
-						document.getElementById('messageUser2').textContent = data.transcription;
-                // Second attempt logic
-                if (data.transcription.toLowerCase().includes('banana')) {
-					document.getElementById('banana').classList.remove('d-none');
-							document.getElementById('bananaCode2').classList.remove('d-none');
-							setGenre('banana');
-                } else {
-
-					document.getElementById('wrongCode2').classList.remove('d-none');
-					chatFailed();
-                }
-            }
-
+							document.getElementById('messageUser2').classList.remove('d-none');
+							document.getElementById('messageUser2').textContent = data.transcription;
+							// Second attempt logic
+							if (data.transcription.toLowerCase().includes('banana')) {
+								document.getElementById('banana').classList.remove('d-none');
+								document.getElementById('bananaCode2').classList.remove('d-none');
+								setGenre('banana');
+							} else if (data.transcription.toLowerCase().includes('apple')) {
+								document.getElementById('appleCode2').classList.remove('d-none');
+								chatFailed();
+							} else {
+								document.getElementById('wrongCode2').classList.remove('d-none');
+								chatFailed();
+							}
+						}
 					})
 					.catch((error) => console.error('Error:', error));
 			}
@@ -1093,16 +1210,16 @@ input:checked ~ .toggle span {
 					document.getElementById('appleCode').classList.add('d-none');
 					document.getElementById('wrongCode2').classList.add('d-none');
 					document.getElementById('bananaCode2').classList.add('d-none');
+					document.getElementById('appleCode2').classList.add('d-none');
 					document.getElementById('startRecord').classList.remove('d-none');
-					
 				}, 8000);
 			}
 
 			function chatRetry() {
-    // Reset for a second attempt
-    document.getElementById('startRecord').classList.remove('d-none'); // Show the record button again
-    attemptCount++; // Increment attempt count for next interaction
-}
+				// Reset for a second attempt
+				document.getElementById('startRecord').classList.remove('d-none'); // Show the record button again
+				attemptCount++; // Increment attempt count for next interaction
+			}
 
 			updateGenerateButtonState();
 		</script>

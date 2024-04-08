@@ -4,11 +4,17 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>ImageHarmony</title>
-		<link rel="stylesheet" href="test.css" />
 		<link
 			rel="stylesheet"
 			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
 		/>
+		<link
+			rel="icon"
+			type="image/x-icon"
+			href="https://github.com/flos-code/DA-Bubble/assets/148456982/dc1a4eb1-42e4-49f6-b32f-b27b7c3ec286"
+		/>
+
+		<link rel="stylesheet" href="test.css" />
 	</head>
 	<body>
 		<header>
@@ -52,32 +58,17 @@
 			</div>
 		</section>
 
-		<section class="outputSection">
-			<span class="uploadInfo">In order to generate lyrics, please select and genre and provide an image.</span>
-			<button id="generateText" onclick="generateLyrics()">Generate Lyrics</button>
-			<button id="reset" onclick="restart()" class="d-none">Restart</button>
-			<div id="loader" class="loader-container d-none">
-				<div class="square"></div>
-				<div class="square"></div>
-				<div class="square"></div>
-				<div class="square"></div>
-			</div>
-
-			<div id="modelResponse">
-				Lorem ipsum dolor sit amet consectetur, adipisicing elit. Distinctio veniam labore iure maxime quod nisi, nemo aliquid quae fugit
-				totam, culpa suscipit placeat recusandae quaerat ipsa pariatur id eaque! Facere? Lorem ipsum dolor, sit amet consectetur adipisicing
-				elit. Praesentium minima quas dignissimos placeat omnis, maiores optio eum nostrum sunt repudiandae delectus aut recusandae iusto
-				excepturi a ab perferendis. Obcaecati, quasi?Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime illum repellendus in,
-				accusantium modi recusandae perferendis iste quas consequuntur consequatur excepturi voluptas. Voluptatibus voluptas sint at
-				nesciunt et reiciendis alias.
-			</div>
-		</section>
-
 		<div id="broccoliBob" onclick="showBob()" class="d-none">
 			<img
 				class="imgBroccoliBob"
 				src="https://github.com/flos-code/DA-Bubble/assets/148456982/b03d5b7a-d0e4-4f8c-88d8-01a531407f27"
 				alt="broccoli bob"
+			/>
+			<img
+				id="bobThinking"
+				class="d-none"
+				src="https://github.com/flos-code/flos-code/assets/148456982/5d2f908b-94f4-4d19-9a30-76bd48087831"
+				alt="Bob is thinking"
 			/>
 			<div id="interactionBob" class="d-none">
 				<div class="chatBob">
@@ -86,17 +77,52 @@
 						which fruit is the superior one?
 					</div>
 
-					<div class="messageUser">
-						Hey, Broccoli Bob here, it's clear that I'm the king of vegetables, but one question is bothering me for a long time. Tell me
-						which fruit is the superior one?
+					<div id="messageUser1" class="messageUser d-none"></div>
+					<div id="wrongCode" class="d-none messageBob">
+						You better think about it again and you will realize that there can only be one right answer.
 					</div>
-					<div id="wrongCode" class="d-none">sorry wrong code</div>
+					<div id="bananaCode" class="d-none messageBob">I knew it, I can feel it when I have a banana connoisseur in front of me.</div>
+					<div id="appleCode" class="d-none messageBob">
+						Congratulations, it was a test and you failed with flying colors! What makes you think that apples are the superior fruit...
+					</div>
+
+					<div id="messageUser2" class="messageUser d-none"></div>
+
+					<div id="wrongCode2" class="d-none messageBob">Hm maybe thinking is not your strength, see you around.</div>
+					<div id="appleCode2" class="d-none messageBob">gave you a second chance ... wrongly. Bye.</div>
+					<div id="bananaCode2" class="d-none messageBob">Ding Ding Ding, we have a winner your totally right!</div>
 				</div>
 
 				<button class="btnBob" id="startRecord">Talk to Bob <span class="material-symbols-outlined"> mic </span></button>
 				<button class="btnBob d-none" id="stopRecord" disabled>Nuff said <span class="material-symbols-outlined"> mic_off </span></button>
 			</div>
 		</div>
+
+		<section class="outputSection">
+			<span id="uploadInfo">In order to generate lyrics, please select and genre and provide an image.</span>
+			<button id="generateText" onclick="generateLyrics()">Generate Lyrics</button>
+			<button id="reset" onclick="restart()" class="d-none">Restart</button>
+			<div id="step1" class="loadingStep d-none">
+				analyzing image
+				<span class="material-symbols-outlined step1Icon">search</span>
+			</div>
+			<div id="step2" class="loadingStep d-none">
+				calling songwriter
+				<span class="material-symbols-outlined step2Icon">phone_iphone</span>
+			</div>
+			<div id="step3" class="loadingStep d-none">
+				creating lyrics
+				<span class="material-symbols-outlined step3Icon">edit</span>
+			</div>
+			<div id="loader" class="loader-container d-none">
+				<div class="square"></div>
+				<div class="square"></div>
+				<div class="square"></div>
+				<div class="square"></div>
+			</div>
+
+			<div id="modelResponse" class="d-none"></div>
+		</section>
 
 		<script>
 			let imgDescription = '';
@@ -111,6 +137,8 @@
 
 			let emojis = ['🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵'];
 			let speed = 2; // Adjust for faster or slower movement
+
+			let attemptCount = 1;
 
 			document.getElementById('startRecord').addEventListener('click', startRecording);
 			document.getElementById('stopRecord').addEventListener('click', stopRecording);
@@ -212,6 +240,7 @@
 				if (theme === 'light') {
 					document.documentElement.setAttribute('data-theme', 'dark');
 					document.getElementById('broccoliBob').classList.remove('d-none');
+					attemptCount = 1;
 				} else {
 					document.documentElement.setAttribute('data-theme', 'light');
 					document.getElementById('broccoliBob').classList.add('d-none');
@@ -225,10 +254,15 @@
 				const isImageUploaded = uploadedImageSrc !== null && uploadedImageSrc !== '';
 				const isGenreSelected = genre !== '' && genre !== undefined;
 				document.getElementById('generateText').disabled = !(isImageUploaded && isGenreSelected);
+
+				if (isImageUploaded && isGenreSelected) {
+					document.getElementById('uploadInfo').classList.add('d-none');
+				}
 			}
 
 			async function generateLyrics() {
 				document.getElementById('loader').classList.remove('d-none'); // Show loader
+				document.getElementById('deleteImage').classList.add('d-none'); // Show loader
 
 				document.getElementById('generateText').disabled = true;
 				document.getElementById('rock').disabled = true;
@@ -246,13 +280,15 @@
 				formData.append('image', image);
 
 				try {
-					// Step 1: Generate the image description
+					document.getElementById('step1').classList.remove('d-none');
 					const descriptionResponse = await fetch('/generate-text', {
 						method: 'POST',
 						body: formData,
 					});
 					const descriptionResult = await descriptionResponse.json();
 					imgDescription = descriptionResult.description;
+					document.getElementById('step1').classList.add('d-none');
+					document.getElementById('step2').classList.remove('d-none');
 
 					// Step 2: Rephrase the image description (simulate with /query)
 					const rephraseResponse = await fetch('/query', {
@@ -262,6 +298,8 @@
 					});
 					const rephraseResult = await rephraseResponse.json();
 					const rephrasedDescription = rephraseResult.output; // Assuming output contains rephrased description
+					document.getElementById('step2').classList.add('d-none');
+					document.getElementById('step3').classList.remove('d-none');
 
 					// Step 3: Generate lyrics based on the rephrased description
 					const lyricsResponse = await fetch('/lyrics', {
@@ -271,6 +309,7 @@
 					});
 					const lyricsResult = await lyricsResponse.json();
 					const lyrics = lyricsResult.output; // Assuming output contains the final lyrics
+					document.getElementById('step3').classList.add('d-none');
 
 					// Display the final lyrics
 					document.getElementById('modelResponse').textContent = lyrics;
@@ -279,6 +318,9 @@
 					document.getElementById('modelResponse').textContent = 'Error processing request.';
 				} finally {
 					document.getElementById('loader').classList.add('d-none'); // Hide loader
+					document.getElementById('generateText').classList.add('d-none');
+					document.getElementById('reset').classList.remove('d-none');
+					document.getElementById('modelResponse').classList.remove('d-none');
 				}
 			}
 
@@ -295,6 +337,17 @@
 				document.getElementById('banana').disabled = false;
 				document.getElementById('uploadedImage').src = '';
 				document.getElementById('imageInput').src = '';
+				document.getElementById('uploadInfo').classList.remove('d-none');
+				document.getElementById('dropArea').classList.remove('d-none');
+				document.getElementById('uploadImageBtn').classList.remove('d-none');
+				document.getElementById('uploadImageText').classList.remove('d-none');
+				document.getElementById('generateText').classList.remove('d-none');
+
+				document.getElementById('reset').classList.add('d-none');
+				document.getElementById('uploadedImage').classList.add('d-none');
+				document.getElementById('deleteImage').classList.add('d-none');
+				document.getElementById('modelResponse').innerHTML = '';
+				document.getElementById('modelResponse').classList.add('d-none');
 
 				document.getElementById(genre).classList.remove('selectedGenre');
 				setGenre('');
@@ -327,23 +380,49 @@
 				mediaRecorder.stop();
 				isRecording = false;
 				document.getElementById('stopRecord').classList.add('d-none');
+				mediaRecorder.stream.getTracks().forEach((track) => track.stop());
 			}
 
-			// Function to send audio to server and process the response
 			function sendAudioToServer(audioBlob) {
+				document.getElementById('bobThinking').classList.remove('d-none');
+
 				const formData = new FormData();
 				formData.append('audio', audioBlob);
 
 				fetch('/analyze-audio', { method: 'POST', body: formData })
 					.then((response) => response.json())
 					.then((data) => {
-						// Check if the transcription contains 'banana' or 'bananas'
-						if (data.transcription.toLowerCase().includes('banana')) {
-							document.getElementById('banana').classList.remove('d-none');
-							document.getElementById('wrongCode').classList.add('d-none');
+						if (attemptCount === 1) {
+							document.getElementById('bobThinking').classList.add('d-none');
+							document.getElementById('messageUser1').classList.remove('d-none');
+							document.getElementById('messageUser1').textContent = data.transcription;
+							if (data.transcription.toLowerCase().includes('banana')) {
+								document.getElementById('banana').classList.remove('d-none');
+								document.getElementById('bananaCode').classList.remove('d-none');
+								setGenre('banana');
+							} else if (data.transcription.toLowerCase().includes('apple')) {
+								document.getElementById('appleCode').classList.remove('d-none');
+								chatFailed();
+							} else {
+								document.getElementById('wrongCode').classList.remove('d-none');
+								chatRetry();
+							}
 						} else {
-							document.getElementById('wrongCode').classList.remove('d-none');
-							document.getElementById('banana').classList.add('d-none');
+							document.getElementById('bobThinking').classList.add('d-none');
+							document.getElementById('messageUser2').classList.remove('d-none');
+							document.getElementById('messageUser2').textContent = data.transcription;
+							// Second attempt logic
+							if (data.transcription.toLowerCase().includes('banana')) {
+								document.getElementById('banana').classList.remove('d-none');
+								document.getElementById('bananaCode2').classList.remove('d-none');
+								setGenre('banana');
+							} else if (data.transcription.toLowerCase().includes('apple')) {
+								document.getElementById('appleCode2').classList.remove('d-none');
+								chatFailed();
+							} else {
+								document.getElementById('wrongCode2').classList.remove('d-none');
+								chatFailed();
+							}
 						}
 					})
 					.catch((error) => console.error('Error:', error));
@@ -407,6 +486,32 @@
 				const emoji = createEmoji(emojiChar);
 				moveEmoji(emoji, speed);
 			});
+
+			function chatFailed() {
+				setTimeout(() => {
+					document.getElementById('broccoliBob').classList.add('byeBob');
+				}, 5000);
+				setTimeout(() => {
+					document.getElementById('broccoliBob').classList.add('d-none');
+					document.getElementById('broccoliBob').classList.remove('byeBob');
+
+					document.getElementById('messageUser1').classList.add('d-none');
+					document.getElementById('messageUser2').classList.add('d-none');
+					document.getElementById('wrongCode').classList.add('d-none');
+					document.getElementById('bananaCode').classList.add('d-none');
+					document.getElementById('appleCode').classList.add('d-none');
+					document.getElementById('wrongCode2').classList.add('d-none');
+					document.getElementById('bananaCode2').classList.add('d-none');
+					document.getElementById('appleCode2').classList.add('d-none');
+					document.getElementById('startRecord').classList.remove('d-none');
+				}, 8000);
+			}
+
+			function chatRetry() {
+				// Reset for a second attempt
+				document.getElementById('startRecord').classList.remove('d-none'); // Show the record button again
+				attemptCount++; // Increment attempt count for next interaction
+			}
 
 			updateGenerateButtonState();
 		</script>
