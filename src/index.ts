@@ -16,6 +16,12 @@ app.get('/', async (c) => {
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>ImageHarmony</title>
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+		/>
+		<link rel="icon" type="image/x-icon" href="https://github.com/flos-code/DA-Bubble/assets/148456982/dc1a4eb1-42e4-49f6-b32f-b27b7c3ec286">
+
 <style>
 	:root[data-theme='light'] {
 	--text: rgb(3, 33, 26);
@@ -58,7 +64,7 @@ body {
 
 #emojis {
 	position: absolute;
-	inset: 16px;
+	inset: 40px;
 	z-index: -1;
 }
 
@@ -296,6 +302,77 @@ header {
 	overflow-y: scroll;
 }
 
+.loadingStep {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.step1Icon {
+	animation: step1Movement 4s linear infinite;
+}
+
+@keyframes step1Movement {
+  0% {
+    transform: translate(-6px, -6px);
+  }
+  25% {
+    transform: translate(6px, 6px);
+  }
+  50% {
+    transform: translate(6px, -6px);
+  }
+  75% {
+    transform: translate(-6px, 6px);
+  }
+  100% {
+    transform: translate(-6px, -6px);
+  }
+}
+
+.step2Icon {
+	animation: step2Movement 2s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+@keyframes step2Movement {
+	0%, 100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+
+.step3Icon {
+	animation: step3Movement 4s linear infinite;
+}
+
+@keyframes step3Movement {
+  0% {
+    transform: translate(-6px, -6px);
+  }
+  17% {
+    transform: translate(6px, -6px);
+  }
+  33% {
+    transform: translate(-6px, -3px);
+  }
+  50% {
+    transform: translate(6px, -3px);
+  }
+  67% {
+    transform: translate(-6px, 0);
+  }
+  83% {
+    transform: translate(6px, 0);
+  }
+  100% {
+    transform: translate(-6px, -6px);
+  }
+}
+
+
 .loader-container {
 	display: flex;
 	width: 46px;
@@ -350,6 +427,13 @@ header {
 	transform: rotate(30deg) translateX(-120px);
 	display: flex;
 	/* Removed the transition property because we will use animations */
+}
+
+#bobThinking {
+    position: absolute;
+    width: 40px;
+    left: 80px;
+    top: 32px;
 }
 
 /* Define a keyframe for moving Bob horizontally */
@@ -507,10 +591,8 @@ input:checked ~ .toggle span {
 }
 
 </style>
-		<link
-			rel="stylesheet"
-			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-		/>
+
+
 	</head>
 	<body>
 		<header>
@@ -558,6 +640,15 @@ input:checked ~ .toggle span {
 			<span id="uploadInfo">In order to generate lyrics, please select and genre and provide an image.</span>
 			<button id="generateText" onclick="generateLyrics()">Generate Lyrics</button>
 			<button id="reset" onclick="restart()" class="d-none">Restart</button>
+			<div id="step1" class="loadingStep d-none">analyzing image 
+				<span class="material-symbols-outlined step1Icon">search</span>
+			</div>
+			<div id="step2" class="loadingStep d-none" >calling songwriter
+			<span class="material-symbols-outlined step2Icon">phone_iphone</span>
+			</div>
+			<div id="step3" class="loadingStep d-none" >creating lyrics
+			<span class="material-symbols-outlined step3Icon">edit</span>
+			</div>
 			<div id="loader" class="loader-container d-none">
 				<div class="square"></div>
 				<div class="square"></div>
@@ -575,6 +666,7 @@ input:checked ~ .toggle span {
 				src="https://github.com/flos-code/DA-Bubble/assets/148456982/b03d5b7a-d0e4-4f8c-88d8-01a531407f27"
 				alt="broccoli bob"
 			/>
+			<img id="bobThinking" class="d-none" src="https://github.com/flos-code/flos-code/assets/148456982/5d2f908b-94f4-4d19-9a30-76bd48087831" alt="Bob is thinking">
 			<div id="interactionBob" class="d-none">
 				<div class="chatBob">
 					<div class="messageBob">
@@ -586,7 +678,17 @@ input:checked ~ .toggle span {
 						Hey, Broccoli Bob here, it's clear that I'm the king of vegetables, but one question is bothering me for a long time. Tell me
 						which fruit is the superior one?
 					</div>
-					<div id="wrongCode" class="d-none">sorry wrong code</div>
+					<div id="wrongCode" class="d-none messageBob">
+					You better think about it again and you will realize that there can only be one right answer.
+					</div>
+					<div id="bananaCode" class="d-none messageBob">
+					I knew it, I can feel it when I have a banana connoisseur in front of me.
+
+					</div>
+					<div id="appleCode" class="d-none messageBob">
+					Congratulations, it was a test and you failed with flying colors! What makes you think that apples are the superior fruit...
+					</div>
+		
 				</div>
 
 				<button class="btnBob" id="startRecord">Talk to Bob <span class="material-symbols-outlined"> mic </span></button>
@@ -747,13 +849,15 @@ input:checked ~ .toggle span {
 				formData.append('image', image);
 
 				try {
-					// Step 1: Generate the image description
+					document.getElementById('step1').classList.remove('d-none');
 					const descriptionResponse = await fetch('/generate-text', {
 						method: 'POST',
 						body: formData,
 					});
 					const descriptionResult = await descriptionResponse.json();
 					imgDescription = descriptionResult.description;
+					document.getElementById('step1').classList.add('d-none');
+					document.getElementById('step2').classList.remove('d-none');
 
 					// Step 2: Rephrase the image description (simulate with /query)
 					const rephraseResponse = await fetch('/query', {
@@ -763,6 +867,8 @@ input:checked ~ .toggle span {
 					});
 					const rephraseResult = await rephraseResponse.json();
 					const rephrasedDescription = rephraseResult.output; // Assuming output contains rephrased description
+					document.getElementById('step2').classList.add('d-none');
+					document.getElementById('step3').classList.remove('d-none');
 
 					// Step 3: Generate lyrics based on the rephrased description
 					const lyricsResponse = await fetch('/lyrics', {
@@ -772,6 +878,7 @@ input:checked ~ .toggle span {
 					});
 					const lyricsResult = await lyricsResponse.json();
 					const lyrics = lyricsResult.output; // Assuming output contains the final lyrics
+					document.getElementById('step3').classList.add('d-none');
 
 					// Display the final lyrics
 					document.getElementById('modelResponse').textContent = lyrics;
@@ -844,24 +951,30 @@ input:checked ~ .toggle span {
 				mediaRecorder.stop();
 				isRecording = false;
 				document.getElementById('stopRecord').classList.add('d-none');
+				mediaRecorder.stream.getTracks().forEach(track => track.stop());
 			}
 
-			// Function to send audio to server and process the response
 			function sendAudioToServer(audioBlob) {
+				document.getElementById('bobThinking').classList.remove('d-none');
 				const formData = new FormData();
 				formData.append('audio', audioBlob);
 
 				fetch('/analyze-audio', { method: 'POST', body: formData })
 					.then((response) => response.json())
 					.then((data) => {
-						// Check if the transcription contains 'banana' or 'bananas'
+						document.getElementById('bobThinking').classList.add('d-none');
 						if (data.transcription.toLowerCase().includes('banana')) {
 							document.getElementById('banana').classList.remove('d-none');
-							document.getElementById('wrongCode').classList.add('d-none');
+							document.getElementById('bananaCode').classList.remove('d-none');
+							setGenre('banana');
+						} else if (data.transcription.toLowerCase().includes('apple')){
+							document.getElementById('appleCode').classList.remove('d-none');
+							chatFailed();
 						} else {
-							document.getElementById('wrongCode').classList.remove('d-none');
-							document.getElementById('banana').classList.add('d-none');
+							document.getElementById('wrongCode').classList.remove('d-none')
+							chatRetry();
 						}
+
 					})
 					.catch((error) => console.error('Error:', error));
 			}
