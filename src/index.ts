@@ -151,6 +151,7 @@ header {
 	inset: 0;
 	width: 230px;
 	height: 230px;
+	opacity: 0.9;
 }
 
 #uploadImageText {
@@ -1057,6 +1058,10 @@ input:checked ~ .toggle span {
 				document.getElementById('modelResponse').innerHTML = '';
 				document.getElementById('modelResponse').classList.add('d-none');
 
+				document.getElementById('step1').classList.add('d-none');
+				document.getElementById('step2').classList.add('d-none');
+				document.getElementById('step3').classList.add('d-none');
+
 				document.getElementById(genre).classList.remove('selectedGenre');
 				setGenre('');
 			}
@@ -1100,15 +1105,62 @@ input:checked ~ .toggle span {
 				fetch('/analyze-audio', { method: 'POST', body: formData })
 					.then((response) => response.json())
 					.then((data) => {
-						if (attemptCount === 1) {
+						analyzeSentiment(data.transcription);
+
+						// if (attemptCount === 1) {
+						// 	document.getElementById('bobThinking').classList.add('d-none');
+						// 	document.getElementById('messageUser1').classList.remove('d-none');
+						// 	document.getElementById('messageUser1').textContent = data.transcription;
+						// 	if (data.transcription.toLowerCase().includes('banana')) {
+						// 		document.getElementById('banana').classList.remove('d-none');
+						// 		document.getElementById('bananaCode').classList.remove('d-none');
+						// 		setGenre('banana');
+						// 	} else if (data.transcription.toLowerCase().includes('apple')) {
+						// 		document.getElementById('appleCode').classList.remove('d-none');
+						// 		chatFailed();
+						// 	} else {
+						// 		document.getElementById('wrongCode').classList.remove('d-none');
+						// 		chatRetry();
+						// 	}
+						// } else {
+						// 	document.getElementById('bobThinking').classList.add('d-none');
+						// 	document.getElementById('messageUser2').classList.remove('d-none');
+						// 	document.getElementById('messageUser2').textContent = data.transcription;
+						// 	// Second attempt logic
+						// 	if (data.transcription.toLowerCase().includes('banana')) {
+						// 		document.getElementById('banana').classList.remove('d-none');
+						// 		document.getElementById('bananaCode2').classList.remove('d-none');
+						// 		setGenre('banana');
+						// 	} else if (data.transcription.toLowerCase().includes('apple')) {
+						// 		document.getElementById('appleCode2').classList.remove('d-none');
+						// 		chatFailed();
+						// 	} else {
+						// 		document.getElementById('wrongCode2').classList.remove('d-none');
+						// 		chatFailed();
+						// 	}
+						// }
+					})
+					.catch((error) => console.error('Error:', error));
+			}
+
+			function analyzeSentiment(transcription) {
+    fetch('/analyze-sentiment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcription: transcription }),
+    })
+    .then(response => response.json())
+    .then(data => {
+
+		if (attemptCount === 1) {
 							document.getElementById('bobThinking').classList.add('d-none');
 							document.getElementById('messageUser1').classList.remove('d-none');
-							document.getElementById('messageUser1').textContent = data.transcription;
-							if (data.transcription.toLowerCase().includes('banana')) {
+							document.getElementById('messageUser1').textContent = transcription;
+							if (data.decision.toLowerCase().includes('codebanana')) {
 								document.getElementById('banana').classList.remove('d-none');
 								document.getElementById('bananaCode').classList.remove('d-none');
 								setGenre('banana');
-							} else if (data.transcription.toLowerCase().includes('apple')) {
+							} else if (data.decision.toLowerCase().includes('codeapple')) {
 								document.getElementById('appleCode').classList.remove('d-none');
 								chatFailed();
 							} else {
@@ -1118,13 +1170,13 @@ input:checked ~ .toggle span {
 						} else {
 							document.getElementById('bobThinking').classList.add('d-none');
 							document.getElementById('messageUser2').classList.remove('d-none');
-							document.getElementById('messageUser2').textContent = data.transcription;
+							document.getElementById('messageUser2').textContent = transcription;
 							// Second attempt logic
-							if (data.transcription.toLowerCase().includes('banana')) {
+							if (data.decision.toLowerCase().includes('codebanana')) {
 								document.getElementById('banana').classList.remove('d-none');
 								document.getElementById('bananaCode2').classList.remove('d-none');
 								setGenre('banana');
-							} else if (data.transcription.toLowerCase().includes('apple')) {
+							} else if (data.decision.toLowerCase().includes('codeapple')) {
 								document.getElementById('appleCode2').classList.remove('d-none');
 								chatFailed();
 							} else {
@@ -1132,9 +1184,16 @@ input:checked ~ .toggle span {
 								chatFailed();
 							}
 						}
-					})
-					.catch((error) => console.error('Error:', error));
-			}
+
+
+
+        console.log('Sentiment Analysis Decision:', data.decision);
+        // // You can proceed with further logic based on the decision here
+    })
+    .catch(error => console.error('Error analyzing sentiment:', error));
+}
+
+			
 
 			function deleteImage() {
 				document.getElementById('imageInput').value = '';
@@ -1153,7 +1212,7 @@ input:checked ~ .toggle span {
 
 				setTimeout(function () {
 					document.getElementById('interactionBob').classList.remove('d-none');
-				}, 3000); // 2000 milliseconds = 2 seconds
+				}, 3000); 
 			}
 
 			function createEmoji(emojiChar) {
@@ -1216,9 +1275,8 @@ input:checked ~ .toggle span {
 			}
 
 			function chatRetry() {
-				// Reset for a second attempt
-				document.getElementById('startRecord').classList.remove('d-none'); // Show the record button again
-				attemptCount++; // Increment attempt count for next interaction
+				document.getElementById('startRecord').classList.remove('d-none');
+				attemptCount++;
 			}
 
 			updateGenerateButtonState();
@@ -1238,10 +1296,16 @@ app.post('/query', async (c) => {
 	const ai = new Ai(c.env.AI);
 
 	const messages = [
+		// {
+		// 	role: 'system',
+		// 	content:
+		// 		'You are a helpful assistant who takes the following picture description and rephrases it so that you can write song lyrics from it. Your task is not to write lyrics directly. Just rewrite the image description so that it is easier to write a song with it.',
+		// },
+
 		{
 			role: 'system',
 			content:
-				'You are a helpful assistant who takes the following picture description and rephrases it so that you can write song lyrics from it. Your task is not to write lyrics directly. Just rewrite the image description so that it is easier to write a song with it.',
+				'Your task is to write down all the things that can be seen in the picture description, i.e. people, objects, animals and anything else that can be seen, so the keywords that describe the picture. Also write down all feelings, emotions and moods that match the given image description.',
 		},
 		{ role: 'user', content },
 	];
@@ -1289,31 +1353,31 @@ app.post('/lyrics', async (c) => {
 	let systemMessage = 'You are a helpful assistant.';
 	if (mode === 'rock') {
 		systemMessage =
-			'Immerse yourself in the spirit of rock. Using the provided template, forge one verse and a chorus that scream rebellion and freedom. Let the raw energy of rock infuse the template’s narrative, morphing it into a powerful anthem of defiance or a celebration of independence, all while keeping the essence of the story intact.';
+			'You have to write an energetic, rebellious and raw rock song for The Rolling Stones using the given keywords, emotions, feelings and moods as a basis for the lyrics. The song should have a verse and a chorus';
 	} else if (mode === 'classic') {
 		systemMessage =
-			'Adopt the persona of a classical composer. Transform the given template into a verse and a chorus that could grace the halls of a grand concert. Employ elegance and a profound depth of emotion, ensuring that the classical rendition of the template’s story carries a timeless beauty and a narrative weight.';
+			'You are Wolfgang Amadeus Mozart and you have to compose an elegant, emotive and timeless classic song using the given keywords, emotions, feelings and moods as a basis for the lyrics. The song should have a verse and a chorus';
 	} else if (mode === 'love') {
 		systemMessage =
-			'Channel your essence into the heart of Amor, and with poetic brevity, craft a love song that sings directly from the provided scenario. Your canvas is clear: one verse and one chorus only. No explanations, no embellishments beyond the song itself. Begin with a verse that paints the initial encounter with love, drawing vividly from the scene set before you. Then, weave a chorus that echoes the eternal nature of this newfound love. Let each word pulse with the rhythm of affection, every line a stroke of emotion, capturing the essence of love in its purest form. Create this as a standalone piece of art, a testament to love, with no need for further commentary.';
+			'You are Cupid the god of love and desire and you have to compose a romantic, passionate and heartfelt love song using the given keywords, emotions, feelings and moods as a basis for the lyrics. The song should have a verse and a chorus';
 	} else if (mode === 'kpop') {
 		systemMessage =
-			'Channel K-pop’s dynamic flair. Take the template and create one verse and a chorus that blend relatable stories with the genre’s signature energetic beats and catchy melodies. Ensure the transformation reflects K-pop’s vibrant culture and visual aesthetics, making the template’s narrative pop.';
+			'You have to write an energetic, catchy and colorful K-Pop song for BTS using the given keywords, emotions, feelings and moods as a basis for the lyrics. The song should have a verse and a chorus';
 	} else if (mode === 'kids') {
 		systemMessage =
-			'Step into a world of childlike wonder. Use the template to compose a verse and a chorus for a kids’ song thats engaging, educational, or simply fun. The lyrics should be easy to understand and sing along to, sparking joy and curiosity while faithfully telling the template’s story.';
+			'You are Kindergarten teacher and you have to write a playful, whimsical and joyful child-friendly song using the given keywords, emotions, feelings and moods as a basis for the lyrics. The song should have a verse and a chorus';
 	} else if (mode === 'hiphop') {
 		systemMessage =
-			'Assume the role of a hip-hop storyteller. With the template as your foundation, lay down a verse and a chorus that convey authentic stories or messages with a compelling rhythm. Let the lyrics reflect hip-hop’s powerful voice, turning the template’s essence into a narrative of resilience or celebration.';
+			'You are 50 cent the Hip-Hop Artist and you have to write a rhythmic, expressive and bold Hip-Hop song using the given keywords, emotions, feelings and moods as a basis for the lyrics. The song should have a verse and a chorus';
 	} else if (mode === 'country') {
 		systemMessage =
-			'Embrace the soul of country music. Transform the template into a verse and a chorus that narrate tales of love, loss, or daily life, with a backdrop of country landscapes or themes. Your lyrics should carry the heartfelt sincerity and narrative depth characteristic of country music, staying true to the original story.';
+			'You are Dolly Parton the Country music icon and you have to write a soulful, nostalgic and heartfelt Country music song using the given keywords, emotions, feelings and moods as a basis for the lyrics. The song should have a verse and a chorus';
 	} else if (mode === 'pop') {
 		systemMessage =
-			'Become a pop lyricist. Craft from the template a catchy pop song with one verse and a chorus. The lyrics should tap into universal themes, using the template’s story to create a relatable and memorable tune that has the potential to captivate a wide audience.';
+			'You are Michael Jackson the Pop music icon and you have to write a catchy, upbeat and polished Pop music song using the given keywords, emotions, feelings and moods as a basis for the lyrics. The song should have a verse and a chorus';
 	} else if (mode === 'banana') {
 		systemMessage =
-			'Dive into the whimsical world of bananas. Take the given template and transform it into a fun, upbeat song centered around bananas. Your verse and chorus should highlight the joy and humor that bananas bring, using playful language and imagery to turn the template’s narrative into a celebration of this beloved fruit.';
+			'You are Comidian and you have to write a happy, funny and carefree song about bananas using the given keywords, emotions, feelings and moods as a basis for the lyrics. The song should have a verse and a chorus';
 	} else {
 		systemMessage =
 			'You are a composer tasked with creating lyrics for a song that includes one verse and a chorus, drawing inspiration from a given template. Focus on encapsulating the theme and emotions of the template, ensuring your lyrics resonate with the selected genre’s unique qualities.';
@@ -1326,7 +1390,6 @@ app.post('/lyrics', async (c) => {
 
 	const inputs = { messages };
 	const res = await ai.run('@cf/meta/llama-2-7b-chat-fp16', inputs);
-	// console.log('AI response:', JSON.stringify(res, null, 2));
 	const outputText = res.response ?? "Sorry, I couldn't process that.";
 
 	return c.json({ output: outputText });
@@ -1349,6 +1412,26 @@ app.post('/analyze-audio', async (c) => {
 	} else {
 		return c.json({ error: 'No audio file provided.' }, 400);
 	}
+});
+
+app.post('/analyze-sentiment', async (c) => {
+	const body = await c.req.json();
+	const transcription = body.transcription;
+	const prompt = `Given the transcription: "${transcription}", is the sentiment pro-banana, pro-apple, or neither? Respond with only! 'codebanana', 'codeapple', or 'codeother'. no other text than that `;
+
+	const ai = new Ai(c.env.AI);
+	const messages = [
+		{
+			role: 'system',
+			content: 'Analyze the sentiment of the following transcription and determine if it is in favor of bananas, apples, or neither.',
+		},
+		{ role: 'user', content: prompt },
+	];
+
+	const inputs = { messages };
+	const res = await ai.run('@cf/meta/llama-2-7b-chat-fp16', inputs);
+	const decision = res.response.trim().toLowerCase();
+	return c.json({ decision });
 });
 
 export default {
