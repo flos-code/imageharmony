@@ -426,7 +426,12 @@ header {
 	transform-origin: center center;
 	transform: rotate(30deg) translateX(-120px);
 	display: flex;
+	transition: opacity 3s ease-out;
 	/* Removed the transition property because we will use animations */
+}
+
+.byeBob {
+	opacity: 0;
 }
 
 #bobThinking {
@@ -674,9 +679,8 @@ input:checked ~ .toggle span {
 						which fruit is the superior one?
 					</div>
 
-					<div class="messageUser">
-						Hey, Broccoli Bob here, it's clear that I'm the king of vegetables, but one question is bothering me for a long time. Tell me
-						which fruit is the superior one?
+					<div id="messageUser1" class="messageUser d-none">
+					
 					</div>
 					<div id="wrongCode" class="d-none messageBob">
 					You better think about it again and you will realize that there can only be one right answer.
@@ -687,6 +691,16 @@ input:checked ~ .toggle span {
 					</div>
 					<div id="appleCode" class="d-none messageBob">
 					Congratulations, it was a test and you failed with flying colors! What makes you think that apples are the superior fruit...
+					</div>
+
+					<div id="messageUser2" class="messageUser d-none"> </div>
+
+					<div id="wrongCode2" class="d-none messageBob">
+					wrong2
+					</div>
+					<div id="bananaCode2" class="d-none messageBob">
+					banan2
+
 					</div>
 		
 				</div>
@@ -709,6 +723,8 @@ input:checked ~ .toggle span {
 
 			let emojis = ['🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵'];
 			let speed = 2; // Adjust for faster or slower movement
+
+			let attemptCount = 1;
 
 			document.getElementById('startRecord').addEventListener('click', startRecording);
 			document.getElementById('stopRecord').addEventListener('click', stopRecording);
@@ -810,11 +826,13 @@ input:checked ~ .toggle span {
 				if (theme === 'light') {
 					document.documentElement.setAttribute('data-theme', 'dark');
 					document.getElementById('broccoliBob').classList.remove('d-none');
+					attemptCount = 1;
 				} else {
 					document.documentElement.setAttribute('data-theme', 'light');
 					document.getElementById('broccoliBob').classList.add('d-none');
 					document.getElementById('broccoliBob').classList.remove('showBob');
 					document.getElementById('interactionBob').classList.add('d-none');
+			
 				}
 			}
 
@@ -956,13 +974,19 @@ input:checked ~ .toggle span {
 
 			function sendAudioToServer(audioBlob) {
 				document.getElementById('bobThinking').classList.remove('d-none');
+
 				const formData = new FormData();
 				formData.append('audio', audioBlob);
 
 				fetch('/analyze-audio', { method: 'POST', body: formData })
 					.then((response) => response.json())
 					.then((data) => {
-						document.getElementById('bobThinking').classList.add('d-none');
+
+
+						if (attemptCount === 1) {
+							document.getElementById('bobThinking').classList.add('d-none');
+						document.getElementById('messageUser1').classList.remove('d-none');
+						document.getElementById('messageUser1').textContent = data.transcription;
 						if (data.transcription.toLowerCase().includes('banana')) {
 							document.getElementById('banana').classList.remove('d-none');
 							document.getElementById('bananaCode').classList.remove('d-none');
@@ -973,7 +997,23 @@ input:checked ~ .toggle span {
 						} else {
 							document.getElementById('wrongCode').classList.remove('d-none')
 							chatRetry();
-						}
+						}}
+						else {
+
+							document.getElementById('bobThinking').classList.add('d-none');
+						document.getElementById('messageUser2').classList.remove('d-none');
+						document.getElementById('messageUser2').textContent = data.transcription;
+                // Second attempt logic
+                if (data.transcription.toLowerCase().includes('banana')) {
+					document.getElementById('banana').classList.remove('d-none');
+							document.getElementById('bananaCode2').classList.remove('d-none');
+							setGenre('banana');
+                } else {
+
+					document.getElementById('wrongCode2').classList.remove('d-none');
+					chatFailed();
+                }
+            }
 
 					})
 					.catch((error) => console.error('Error:', error));
@@ -1037,6 +1077,32 @@ input:checked ~ .toggle span {
 				const emoji = createEmoji(emojiChar);
 				moveEmoji(emoji, speed);
 			});
+
+			function chatFailed() {
+				setTimeout(() => {
+					document.getElementById('broccoliBob').classList.add('byeBob');
+				}, 5000);
+				setTimeout(() => {
+					document.getElementById('broccoliBob').classList.add('d-none');
+					document.getElementById('broccoliBob').classList.remove('byeBob');
+
+					document.getElementById('messageUser1').classList.add('d-none');
+					document.getElementById('messageUser2').classList.add('d-none');
+					document.getElementById('wrongCode').classList.add('d-none');
+					document.getElementById('bananaCode').classList.add('d-none');
+					document.getElementById('appleCode').classList.add('d-none');
+					document.getElementById('wrongCode2').classList.add('d-none');
+					document.getElementById('bananaCode2').classList.add('d-none');
+					document.getElementById('startRecord').classList.remove('d-none');
+					
+				}, 8000);
+			}
+
+			function chatRetry() {
+    // Reset for a second attempt
+    document.getElementById('startRecord').classList.remove('d-none'); // Show the record button again
+    attemptCount++; // Increment attempt count for next interaction
+}
 
 			updateGenerateButtonState();
 		</script>
