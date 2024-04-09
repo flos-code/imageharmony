@@ -13,7 +13,6 @@
 			type="image/x-icon"
 			href="https://github.com/flos-code/DA-Bubble/assets/148456982/dc1a4eb1-42e4-49f6-b32f-b27b7c3ec286"
 		/>
-
 		<link rel="stylesheet" href="test.css" />
 	</head>
 	<body>
@@ -45,9 +44,9 @@
 						or</span
 					>
 				</div>
-				<input type="file" id="imageInput" class="d-none" accept="image/*" />
+				<input type="file" id="imageInput" class="d-none" accept="image/png, image/jpeg, image/svg+xml" />
 				<div id="dropArea" class="drop-area">
-					<input type="file" id="fileElem" multiple accept="image/*" class="file-elem" />
+					<input type="file" id="fileElem" multiple accept="image/png, image/jpeg, image/svg+xml" class="file-elem" />
 				</div>
 
 				<img id="uploadedImage" class="d-none" />
@@ -183,12 +182,8 @@
 				const dropArea = document.getElementById('dropArea');
 				const fileInput = document.getElementById('fileElem');
 				const imageInput = document.getElementById('imageInput');
-
-				// Function to handle files from both drag-and-drop and file input
 				function handleFiles(files) {
-					// Check if any files were uploaded
 					if (files.length > 0) {
-						// Process the first file (if multiple, you would need to loop through)
 						const file = files[0];
 						imgUpload = file;
 						document.getElementById('deleteImage').classList.remove('d-none');
@@ -198,17 +193,14 @@
 						const reader = new FileReader();
 
 						reader.onload = function (e) {
-							// Update the display with the image
 							document.getElementById('uploadedImage').src = e.target.result;
 							document.getElementById('uploadedImage').classList.remove('d-none');
-							updateGenerateButtonState(); // Update button states accordingly
+							updateGenerateButtonState();
 						};
-
-						reader.readAsDataURL(file); // Read the file to display it
+						reader.readAsDataURL(file);
 					}
 				}
 
-				// Drag-and-drop events
 				dropArea.addEventListener('dragover', (e) => {
 					e.preventDefault();
 					dropArea.classList.add('active');
@@ -221,15 +213,24 @@
 				dropArea.addEventListener('drop', (e) => {
 					e.preventDefault();
 					dropArea.classList.remove('active');
-					handleFiles(e.dataTransfer.files);
+
+					const files = e.dataTransfer.files;
+					const validTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
+
+					for (const file of files) {
+						if (!validTypes.includes(file.type)) {
+							alert('Only PNG, JPG, and SVG files are allowed.');
+							return;
+						}
+					}
+
+					handleFiles(files);
 				});
 
-				// Change event for the hidden file input
 				fileInput.addEventListener('change', (e) => {
 					handleFiles(e.target.files);
 				});
 
-				// Change event for the visible file input
 				imageInput.addEventListener('change', (e) => {
 					handleFiles(e.target.files);
 				});
@@ -261,8 +262,8 @@
 			}
 
 			async function generateLyrics() {
-				document.getElementById('loader').classList.remove('d-none'); // Show loader
-				document.getElementById('deleteImage').classList.add('d-none'); // Show loader
+				document.getElementById('loader').classList.remove('d-none');
+				document.getElementById('deleteImage').classList.add('d-none');
 
 				document.getElementById('generateText').disabled = true;
 				document.getElementById('rock').disabled = true;
@@ -289,35 +290,29 @@
 					imgDescription = descriptionResult.description;
 					document.getElementById('step1').classList.add('d-none');
 					document.getElementById('step2').classList.remove('d-none');
-
-					// Step 2: Rephrase the image description (simulate with /query)
 					const rephraseResponse = await fetch('/query', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({ content: imgDescription, mode: genre }),
 					});
 					const rephraseResult = await rephraseResponse.json();
-					const rephrasedDescription = rephraseResult.output; // Assuming output contains rephrased description
+					const rephrasedDescription = rephraseResult.output;
 					document.getElementById('step2').classList.add('d-none');
 					document.getElementById('step3').classList.remove('d-none');
-
-					// Step 3: Generate lyrics based on the rephrased description
 					const lyricsResponse = await fetch('/lyrics', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({ content: rephrasedDescription, mode: genre }),
 					});
 					const lyricsResult = await lyricsResponse.json();
-					const lyrics = lyricsResult.output; // Assuming output contains the final lyrics
+					const lyrics = lyricsResult.output;
 					document.getElementById('step3').classList.add('d-none');
-
-					// Display the final lyrics
 					document.getElementById('modelResponse').textContent = lyrics;
 				} catch (error) {
 					console.error('Error:', error);
 					document.getElementById('modelResponse').textContent = 'Error processing request.';
 				} finally {
-					document.getElementById('loader').classList.add('d-none'); // Hide loader
+					document.getElementById('loader').classList.add('d-none');
 					document.getElementById('generateText').classList.add('d-none');
 					document.getElementById('reset').classList.remove('d-none');
 					document.getElementById('modelResponse').classList.remove('d-none');
@@ -342,13 +337,14 @@
 				document.getElementById('uploadImageBtn').classList.remove('d-none');
 				document.getElementById('uploadImageText').classList.remove('d-none');
 				document.getElementById('generateText').classList.remove('d-none');
-
 				document.getElementById('reset').classList.add('d-none');
 				document.getElementById('uploadedImage').classList.add('d-none');
 				document.getElementById('deleteImage').classList.add('d-none');
 				document.getElementById('modelResponse').innerHTML = '';
 				document.getElementById('modelResponse').classList.add('d-none');
-
+				document.getElementById('step1').classList.add('d-none');
+				document.getElementById('step2').classList.add('d-none');
+				document.getElementById('step3').classList.add('d-none');
 				document.getElementById(genre).classList.remove('selectedGenre');
 				setGenre('');
 			}
@@ -373,8 +369,6 @@
 					});
 				});
 			}
-
-			// Function to stop recording
 			function stopRecording() {
 				if (!isRecording) return;
 				mediaRecorder.stop();
@@ -392,15 +386,61 @@
 				fetch('/analyze-audio', { method: 'POST', body: formData })
 					.then((response) => response.json())
 					.then((data) => {
+						analyzeSentiment(data.transcription);
+
+						// if (attemptCount === 1) {
+						// 	document.getElementById('bobThinking').classList.add('d-none');
+						// 	document.getElementById('messageUser1').classList.remove('d-none');
+						// 	document.getElementById('messageUser1').textContent = data.transcription;
+						// 	if (data.transcription.toLowerCase().includes('banana')) {
+						// 		document.getElementById('banana').classList.remove('d-none');
+						// 		document.getElementById('bananaCode').classList.remove('d-none');
+						// 		setGenre('banana');
+						// 	} else if (data.transcription.toLowerCase().includes('apple')) {
+						// 		document.getElementById('appleCode').classList.remove('d-none');
+						// 		chatFailed();
+						// 	} else {
+						// 		document.getElementById('wrongCode').classList.remove('d-none');
+						// 		chatRetry();
+						// 	}
+						// } else {
+						// 	document.getElementById('bobThinking').classList.add('d-none');
+						// 	document.getElementById('messageUser2').classList.remove('d-none');
+						// 	document.getElementById('messageUser2').textContent = data.transcription;
+						// 	// Second attempt logic
+						// 	if (data.transcription.toLowerCase().includes('banana')) {
+						// 		document.getElementById('banana').classList.remove('d-none');
+						// 		document.getElementById('bananaCode2').classList.remove('d-none');
+						// 		setGenre('banana');
+						// 	} else if (data.transcription.toLowerCase().includes('apple')) {
+						// 		document.getElementById('appleCode2').classList.remove('d-none');
+						// 		chatFailed();
+						// 	} else {
+						// 		document.getElementById('wrongCode2').classList.remove('d-none');
+						// 		chatFailed();
+						// 	}
+						// }
+					})
+					.catch((error) => console.error('Error:', error));
+			}
+
+			function analyzeSentiment(transcription) {
+				fetch('/analyze-sentiment', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ transcription: transcription }),
+				})
+					.then((response) => response.json())
+					.then((data) => {
 						if (attemptCount === 1) {
 							document.getElementById('bobThinking').classList.add('d-none');
 							document.getElementById('messageUser1').classList.remove('d-none');
-							document.getElementById('messageUser1').textContent = data.transcription;
-							if (data.transcription.toLowerCase().includes('banana')) {
+							document.getElementById('messageUser1').textContent = transcription;
+							if (data.decision.toLowerCase().includes('codebanana')) {
 								document.getElementById('banana').classList.remove('d-none');
 								document.getElementById('bananaCode').classList.remove('d-none');
 								setGenre('banana');
-							} else if (data.transcription.toLowerCase().includes('apple')) {
+							} else if (data.decision.toLowerCase().includes('codeapple')) {
 								document.getElementById('appleCode').classList.remove('d-none');
 								chatFailed();
 							} else {
@@ -410,13 +450,12 @@
 						} else {
 							document.getElementById('bobThinking').classList.add('d-none');
 							document.getElementById('messageUser2').classList.remove('d-none');
-							document.getElementById('messageUser2').textContent = data.transcription;
-							// Second attempt logic
-							if (data.transcription.toLowerCase().includes('banana')) {
+							document.getElementById('messageUser2').textContent = transcription;
+							if (data.decision.toLowerCase().includes('codebanana')) {
 								document.getElementById('banana').classList.remove('d-none');
 								document.getElementById('bananaCode2').classList.remove('d-none');
 								setGenre('banana');
-							} else if (data.transcription.toLowerCase().includes('apple')) {
+							} else if (data.decision.toLowerCase().includes('codeapple')) {
 								document.getElementById('appleCode2').classList.remove('d-none');
 								chatFailed();
 							} else {
@@ -424,8 +463,10 @@
 								chatFailed();
 							}
 						}
+
+						console.log('Sentiment Analysis Decision:', data.decision);
 					})
-					.catch((error) => console.error('Error:', error));
+					.catch((error) => console.error('Error analyzing sentiment:', error));
 			}
 
 			function deleteImage() {
@@ -445,7 +486,7 @@
 
 				setTimeout(function () {
 					document.getElementById('interactionBob').classList.remove('d-none');
-				}, 3000); // 2000 milliseconds = 2 seconds
+				}, 3000);
 			}
 
 			function createEmoji(emojiChar) {
@@ -461,21 +502,16 @@
 				let y = Math.random() * document.getElementById('emojis').offsetHeight;
 				let dx = (Math.random() - 0.5) * speed;
 				let dy = (Math.random() - 0.5) * speed;
-
 				function animate() {
 					const emojisDiv = document.getElementById('emojis');
 					const maxX = emojisDiv.offsetWidth - emoji.offsetWidth;
 					const maxY = emojisDiv.offsetHeight - emoji.offsetHeight;
-
 					x += dx;
 					y += dy;
-
 					if (x <= 0 || x >= maxX) dx *= -1;
 					if (y <= 0 || y >= maxY) dy *= -1;
-
 					emoji.style.left = x + 'px';
 					emoji.style.top = y + 'px';
-
 					requestAnimationFrame(animate);
 				}
 
@@ -494,7 +530,6 @@
 				setTimeout(() => {
 					document.getElementById('broccoliBob').classList.add('d-none');
 					document.getElementById('broccoliBob').classList.remove('byeBob');
-
 					document.getElementById('messageUser1').classList.add('d-none');
 					document.getElementById('messageUser2').classList.add('d-none');
 					document.getElementById('wrongCode').classList.add('d-none');
@@ -508,9 +543,8 @@
 			}
 
 			function chatRetry() {
-				// Reset for a second attempt
-				document.getElementById('startRecord').classList.remove('d-none'); // Show the record button again
-				attemptCount++; // Increment attempt count for next interaction
+				document.getElementById('startRecord').classList.remove('d-none');
+				attemptCount++;
 			}
 
 			updateGenerateButtonState();

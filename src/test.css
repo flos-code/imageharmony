@@ -27,6 +27,10 @@
 	box-sizing: border-box;
 }
 
+.d-none {
+	display: none !important;
+}
+
 @import url('https://fonts.googleapis.com/css?family=Salsa:700|Salsa:400');
 
 body {
@@ -45,7 +49,7 @@ body {
 
 .emoji {
 	position: absolute;
-	font-size: 32px; /* Adjust size as needed */
+	font-size: 32px;
 	filter: drop-shadow(4px 4px 8px var(--text));
 }
 
@@ -54,10 +58,6 @@ header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-}
-
-.d-none {
-	display: none !important;
 }
 
 .inputSection {
@@ -122,6 +122,7 @@ header {
 	inset: 0;
 	width: 230px;
 	height: 230px;
+	opacity: 0.9;
 }
 
 #uploadImageText {
@@ -361,11 +362,10 @@ header {
 .square {
 	width: 20px;
 	height: 20px;
-	background-color: var(--accent); /* White squares */
+	background-color: var(--accent);
 	animation: changeColor 2s infinite linear;
 }
 
-/* Animation Keyframes */
 @keyframes changeColor {
 	0%,
 	100% {
@@ -382,7 +382,6 @@ header {
 	}
 }
 
-/* Apply different animation delays to each square */
 .loader-container .square:nth-child(2) {
 	animation-delay: 0.5s;
 }
@@ -402,7 +401,6 @@ header {
 	transform: rotate(30deg) translateX(-120px);
 	display: flex;
 	transition: opacity 3s ease-out;
-	/* Removed the transition property because we will use animations */
 }
 
 .byeBob {
@@ -416,7 +414,6 @@ header {
 	top: 32px;
 }
 
-/* Define a keyframe for moving Bob horizontally */
 @keyframes moveBob {
 	from {
 		transform: translateX(-120px) rotate(30deg);
@@ -436,7 +433,7 @@ header {
 }
 
 .showBob {
-	animation: moveBob 1.5s forwards, rotateBob 1.5s 1.5s forwards; /* Start after moveBob finishes */
+	animation: moveBob 1.5s forwards, rotateBob 1.5s 1.5s forwards;
 }
 
 #interactionBob {
@@ -672,6 +669,16 @@ input:checked ~ .toggle span {
 	.imgBroccoliBob {
 		width: 150px;
 		height: 150px;
+	}
+
+	#bobThinking {
+		left: 60px;
+		width: 32px;
+	}
+
+	#uploadedImage {
+		width: 200px;
+		height: 200px;
 	}
 
 	#interactionBob {

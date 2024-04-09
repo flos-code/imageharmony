@@ -754,9 +754,9 @@ input:checked ~ .toggle span {
 						or</span
 					>
 				</div>
-				<input type="file" id="imageInput" class="d-none" accept="image/*" />
+				<input type="file" id="imageInput" class="d-none" accept="image/png, image/jpeg, image/svg+xml" />
 				<div id="dropArea" class="drop-area">
-					<input type="file" id="fileElem" multiple accept="image/*" class="file-elem" />
+					<input type="file" id="fileElem" multiple accept="image/png, image/jpeg, image/svg+xml" class="file-elem" />
 				</div>
 
 				<img id="uploadedImage" class="d-none" />
@@ -928,10 +928,23 @@ input:checked ~ .toggle span {
 				});
 
 				dropArea.addEventListener('drop', (e) => {
-					e.preventDefault();
-					dropArea.classList.remove('active');
-					handleFiles(e.dataTransfer.files);
-				});
+    				e.preventDefault();
+    				dropArea.classList.remove('active');
+
+    				const files = e.dataTransfer.files;
+    				const validTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
+
+				    for (const file of files) {
+        				if (!validTypes.includes(file.type)) {
+            				alert('Only PNG, JPG, and SVG files are allowed.');
+            			return; // Stop processing further if any file is invalid
+       					 }
+    }
+
+    // If all files are valid, proceed to handle them
+    handleFiles(files);
+});
+
 
 				// Change event for the hidden file input
 				fileInput.addEventListener('change', (e) => {
