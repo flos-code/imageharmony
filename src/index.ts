@@ -937,21 +937,15 @@ input:checked ~ .toggle span {
 				    for (const file of files) {
         				if (!validTypes.includes(file.type)) {
             				alert('Only PNG, JPG, and SVG files are allowed.');
-            			return; // Stop processing further if any file is invalid
+            			return; 
        					 }
     }
-
-    // If all files are valid, proceed to handle them
     handleFiles(files);
 });
 
-
-				// Change event for the hidden file input
 				fileInput.addEventListener('change', (e) => {
 					handleFiles(e.target.files);
 				});
-
-				// Change event for the visible file input
 				imageInput.addEventListener('change', (e) => {
 					handleFiles(e.target.files);
 				});
@@ -983,8 +977,8 @@ input:checked ~ .toggle span {
 			}
 
 			async function generateLyrics() {
-				document.getElementById('loader').classList.remove('d-none'); // Show loader
-				document.getElementById('deleteImage').classList.add('d-none'); // Show loader
+				document.getElementById('loader').classList.remove('d-none'); 
+				document.getElementById('deleteImage').classList.add('d-none'); 
 
 				document.getElementById('generateText').disabled = true;
 				document.getElementById('rock').disabled = true;
@@ -1012,34 +1006,31 @@ input:checked ~ .toggle span {
 					document.getElementById('step1').classList.add('d-none');
 					document.getElementById('step2').classList.remove('d-none');
 
-					// Step 2: Rephrase the image description (simulate with /query)
 					const rephraseResponse = await fetch('/query', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({ content: imgDescription, mode: genre }),
 					});
 					const rephraseResult = await rephraseResponse.json();
-					const rephrasedDescription = rephraseResult.output; // Assuming output contains rephrased description
+					const rephrasedDescription = rephraseResult.output; 
 					document.getElementById('step2').classList.add('d-none');
 					document.getElementById('step3').classList.remove('d-none');
 
-					// Step 3: Generate lyrics based on the rephrased description
 					const lyricsResponse = await fetch('/lyrics', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({ content: rephrasedDescription, mode: genre }),
 					});
 					const lyricsResult = await lyricsResponse.json();
-					const lyrics = lyricsResult.output; // Assuming output contains the final lyrics
+					const lyrics = lyricsResult.output; 
 					document.getElementById('step3').classList.add('d-none');
 
-					// Display the final lyrics
 					document.getElementById('modelResponse').textContent = lyrics;
 				} catch (error) {
 					console.error('Error:', error);
 					document.getElementById('modelResponse').textContent = 'Error processing request.';
 				} finally {
-					document.getElementById('loader').classList.add('d-none'); // Hide loader
+					document.getElementById('loader').classList.add('d-none'); 
 					document.getElementById('generateText').classList.add('d-none');
 					document.getElementById('reset').classList.remove('d-none');
 					document.getElementById('modelResponse').classList.remove('d-none');
@@ -1100,7 +1091,6 @@ input:checked ~ .toggle span {
 				});
 			}
 
-			// Function to stop recording
 			function stopRecording() {
 				if (!isRecording) return;
 				mediaRecorder.stop();
@@ -1184,7 +1174,6 @@ input:checked ~ .toggle span {
 							document.getElementById('bobThinking').classList.add('d-none');
 							document.getElementById('messageUser2').classList.remove('d-none');
 							document.getElementById('messageUser2').textContent = transcription;
-							// Second attempt logic
 							if (data.decision.toLowerCase().includes('codebanana')) {
 								document.getElementById('banana').classList.remove('d-none');
 								document.getElementById('bananaCode2').classList.remove('d-none');
@@ -1201,7 +1190,7 @@ input:checked ~ .toggle span {
 
 
         console.log('Sentiment Analysis Decision:', data.decision);
-        // // You can proceed with further logic based on the decision here
+
     })
     .catch(error => console.error('Error analyzing sentiment:', error));
 }
@@ -1325,7 +1314,6 @@ app.post('/query', async (c) => {
 
 	const inputs = { messages };
 	const res = await ai.run('@cf/meta/llama-2-7b-chat-fp16', inputs);
-	// console.log('AI response:', JSON.stringify(res, null, 2));
 	const outputText = res.response ?? "Sorry, I couldn't process that.";
 
 	return c.json({ output: outputText });

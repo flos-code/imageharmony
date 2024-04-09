@@ -135,7 +135,7 @@
 			let isRecording = false;
 
 			let emojis = ['🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵'];
-			let speed = 2; // Adjust for faster or slower movement
+			let speed = 2;
 
 			let attemptCount = 1;
 
@@ -369,6 +369,7 @@
 					});
 				});
 			}
+
 			function stopRecording() {
 				if (!isRecording) return;
 				mediaRecorder.stop();
