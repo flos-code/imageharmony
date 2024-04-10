@@ -25,16 +25,17 @@
 » TypeScript <br>
 » CSS
 
-<h3>Used Tools, Components and inspiration</h3>
-dark mode toogle
-realtime colors
-flying emojis
+<h3>used tools, components and inspiration</h3>
+
+» Dark Mode Toggle from Justin Schroeder - <a href='https://codepen.io/justin-schroeder/pen/zYyVvxQ'>CodePen</a> <br>
+» Color Themes for light and dark mode - <a href='https://www.realtimecolors.com/?colors=050315-fbfbfe-2f27ce-dedcff-433bff&fonts=Poppins-Poppins'>Realtime Colors</a> <br>
+» Inspiration for moving emojis in background - <a href='https://www.htmlcssbuttongenerator.com/css-glassmorphism-generator.html'>CSS glassmorphism generator</a>
 
 <h2>Screenshots of the Project 📸</h2>
 <br>
 
 <div align='center'>
 <img src='https://github.com/flos-code/DA-Bubble/assets/148456982/4cce4406-b1e3-43d5-8d6d-4c844ef02f6f'/>
-<img src='https://github.com/flos-code/DA-Bubble/assets/148456982/cebb6ade-02b9-4bad-ba7a-fbf6190f980a'/>
+<img src='https://github.com/flos-code/DA-Bubble/assets/148456982/f9f76f2c-0bbc-47ee-b5dc-6945495a72ee'/>
 
 </div>
