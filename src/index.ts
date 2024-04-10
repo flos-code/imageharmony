@@ -395,7 +395,6 @@ header {
 	animation: changeColor 2s infinite linear;
 }
 
-/* Animation Keyframes */
 @keyframes changeColor {
 	0%,
 	100% {
@@ -412,7 +411,6 @@ header {
 	}
 }
 
-/* Apply different animation delays to each square */
 .loader-container .square:nth-child(2) {
 	animation-delay: 0.5s;
 }
@@ -432,7 +430,6 @@ header {
 	transform: rotate(30deg) translateX(-120px);
 	display: flex;
 	transition: opacity 3s ease-out;
-	/* Removed the transition property because we will use animations */
 }
 
 .byeBob {
@@ -466,7 +463,7 @@ header {
 }
 
 .showBob {
-	animation: moveBob 1.5s forwards, rotateBob 1.5s 1.5s forwards; /* Start after moveBob finishes */
+	animation: moveBob 1.5s forwards, rotateBob 1.5s 1.5s forwards; 
 }
 
 #interactionBob {
@@ -853,11 +850,13 @@ input:checked ~ .toggle span {
 			document.getElementById('stopRecord').addEventListener('click', stopRecording);
 
 			function setGenre(selectedGenre) {
-				if (genre !== '') {
-					document.getElementById(genre).classList.remove('selectedGenre');
-				}
-				document.getElementById(selectedGenre).classList.add('selectedGenre');
-				genre = selectedGenre;
+				if (genre && document.getElementById(genre)) {
+        		document.getElementById(genre).classList.remove('selectedGenre');
+    			}
+   		 		genre = selectedGenre;
+    			if (genre && document.getElementById(genre)) {
+        		document.getElementById(genre).classList.add('selectedGenre');
+    			}
 
 				document.getElementById('emojis').innerHTML = '';
 
@@ -879,6 +878,8 @@ input:checked ~ .toggle span {
 					emojis = ['🎤', '🎤', '🎤', '🎤', '🎤', '🎤', '🎤', '🎤', '🎤', '🎤'];
 				} else if (selectedGenre === 'banana') {
 					emojis = ['🍌', '🍌', '🍌', '🍌', '🍌', '🍌', '🍌', '🍌', '🍌', '🍌'];
+				} else if (selectedGenre === '') {
+					emojis = ['🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵', '🎵'];
 				}
 
 				emojis.forEach((emojiChar) => {
@@ -1065,8 +1066,6 @@ input:checked ~ .toggle span {
 				document.getElementById('step1').classList.add('d-none');
 				document.getElementById('step2').classList.add('d-none');
 				document.getElementById('step3').classList.add('d-none');
-
-				document.getElementById(genre).classList.remove('selectedGenre');
 				setGenre('');
 			}
 
